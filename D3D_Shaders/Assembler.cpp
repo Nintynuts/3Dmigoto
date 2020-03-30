@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "float.h"
+#include <stdexcept>
 
 using namespace std;
 

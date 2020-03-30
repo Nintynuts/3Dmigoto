@@ -182,6 +182,12 @@
  *
  */
 
+#include <sdkddkver.h>
+#ifdef _WIN32_WINNT_WIN10
+#include <stdint.h>
+#define _PSTDINT_H_INCLUDED
+#endif
+
 #include <stddef.h>
 #include <limits.h>
 #include <signal.h>
@@ -617,6 +623,7 @@
  *  stdint.h.
  */
 
+#ifndef stdint_fast_defined
 typedef   int_least8_t   int_fast8_t;
 typedef  uint_least8_t  uint_fast8_t;
 typedef  int_least16_t  int_fast16_t;
@@ -639,6 +646,8 @@ typedef uint_least32_t uint_fast32_t;
 # define  INT_FAST64_MAX  INT_LEAST64_MAX
 # define  INT_FAST64_MIN  INT_LEAST64_MIN
 #endif
+#endif
+#undef stdint_fast_defined
 
 #undef stdint_int64_defined
 
