@@ -22,6 +22,7 @@
 #include "nvapi.h"
 #include "log.h"
 #include "util.h"
+#include "type_name_dx11.h"
 #include "shader.h"
 #include "DecompileHLSL.h"
 #include "HackerContext.h"

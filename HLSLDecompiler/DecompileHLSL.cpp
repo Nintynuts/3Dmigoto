@@ -26,9 +26,9 @@
 
 #include "DecompileHLSL.h"
 
-#include "BinaryDecompiler\include\pstdint.h"
-#include "BinaryDecompiler\internal_includes\structs.h"
-#include "BinaryDecompiler\internal_includes\decode.h"
+#include "pstdint.h"
+#include "..\BinaryDecompiler\internal_includes\structs.h"
+#include "..\BinaryDecompiler\internal_includes\decode.h"
 
 #include <excpt.h>
 

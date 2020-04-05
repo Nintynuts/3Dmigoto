@@ -1,18 +1,19 @@
+#define NOMINMAX
 #include "input.h"
 
-#include "Main.h"
-#include "../util.h"
-#include <vector>
+#include "util.h"
 #include "../DirectX11/vkeys.h"
 #include <Xinput.h>
+
 #include <algorithm>
 #include <ctime>
 #include <exception>
+#include <vector>
 
 // VS2013 BUG WORKAROUND: Make sure this class has a unique type name!
 class KeyParseError: public exception {} keyParseError;
 
-void InputListener::UpEvent(D3D10Base::ID3D10Device *device)
+void InputListener::UpEvent(ID3D10Device *device)
 {
 }
 
@@ -25,13 +26,13 @@ InputCallbacks::InputCallbacks(InputCallback down_cb, InputCallback up_cb,
 	private_data(private_data)
 {}
 
-void InputCallbacks::DownEvent(D3D10Base::ID3D10Device *device)
+void InputCallbacks::DownEvent(ID3D10Device *device)
 {
 	if (down_cb)
 		return down_cb(device, private_data);
 }
 
-void InputCallbacks::UpEvent(D3D10Base::ID3D10Device *device)
+void InputCallbacks::UpEvent(ID3D10Device *device)
 {
 	if (up_cb)
 		return up_cb(device, private_data);
@@ -52,7 +53,7 @@ InputAction::~InputAction()
 	delete listener;
 }
 
-bool InputAction::Dispatch(D3D10Base::ID3D10Device *device)
+bool InputAction::Dispatch(ID3D10Device *device)
 {
 	bool state = button->CheckState();
 
@@ -110,7 +111,7 @@ RepeatingInputAction::RepeatingInputAction(InputButton *button, InputListener *l
 	InputAction(button, listener)
 {}
 
-bool RepeatingInputAction::Dispatch(D3D10Base::ID3D10Device *device)
+bool RepeatingInputAction::Dispatch(ID3D10Device *device)
 {
 	int ms = (1000 / repeatRate);
 	if (GetTickCount64() < (lastTick + ms))
@@ -143,7 +144,7 @@ DelayedInputAction::DelayedInputAction(InputButton *button, InputListener *liste
 	InputAction(button, listener)
 {}
 
-bool DelayedInputAction::Dispatch(D3D10Base::ID3D10Device *device)
+bool DelayedInputAction::Dispatch(ID3D10Device *device)
 {
 	ULONGLONG now = GetTickCount64();
 	bool state = button->CheckState();
@@ -347,7 +348,7 @@ void ClearKeyBindings()
 }
 
 
-bool DispatchInputEvents(D3D10Base::ID3D10Device *device)
+bool DispatchInputEvents(ID3D10Device *device)
 {
 	std::vector<class InputAction *>::iterator i;
 	class InputAction *action;

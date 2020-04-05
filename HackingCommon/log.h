@@ -1,9 +1,10 @@
 #pragma once
 
-using namespace std;
-
+#include <stdio.h>
+#include <time.h>
 #include <string>
-#include <ctime>
+
+using namespace std;
 
 // Wrappers to make logging cleaner.
 

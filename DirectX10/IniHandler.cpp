@@ -2,20 +2,10 @@
 
 #include <string>
 
-#include "Main.h"
 #include "globals.h"
 #include "Override.h"
 #include "Hunting.h"
-
-
-static char *readStringParameter(wchar_t *val)
-{
-	static char buf[MAX_PATH];
-	wcstombs(buf, val, MAX_PATH);
-	RightStripA(buf);
-	char *start = buf; while (isspace(*start)) start++;
-	return start;
-}
+#include "util.h"
 
 // Case insensitive version of less comparitor. This is used to create case
 // insensitive sets of section names in the ini so we can detect duplicate
@@ -290,21 +280,6 @@ static void GetIniSections(IniSections &sections, wchar_t *iniFile)
 	delete[] buf;
 }
 
-string LogTime()
-{
-	string timeStr;
-	char cTime[32];
-	tm timestruct;
-
-	time_t ltime = time(0);
-	localtime_s(&timestruct, &ltime);
-	asctime_s(cTime, sizeof(cTime), &timestruct);
-
-	timeStr = cTime;
-	return timeStr;
-}
-
-
 void LoadConfigFile()
 {
 	wchar_t iniFile[MAX_PATH];
@@ -324,8 +299,8 @@ void LoadConfigFile()
 	// [Logging]
 	if (GetPrivateProfileInt(L"Logging", L"calls", 1, iniFile))
 	{
-		if (!gLogFile)
-			gLogFile = _fsopen("d3d10_log.txt", "w", _SH_DENYNO);
+		if (!LogFile)
+			LogFile = _fsopen("d3d10_log.txt", "w", _SH_DENYNO);
 		LogInfo("\nD3D10 DLL starting init  -  %s\n\n", LogTime().c_str());
 		LogInfo("----------- d3dx.ini settings -----------\n");
 	}
@@ -340,7 +315,7 @@ void LoadConfigFile()
 	int unbuffered = -1;
 	if (GetPrivateProfileInt(L"Logging", L"unbuffered", 0, iniFile))
 	{
-		unbuffered = setvbuf(gLogFile, NULL, _IONBF, 0);
+		unbuffered = setvbuf(LogFile, NULL, _IONBF, 0);
 	}
 
 	// Set the CPU affinity based upon d3dx.ini setting.  Useful for debugging and shader hunting in AC3.
@@ -365,7 +340,7 @@ void LoadConfigFile()
 			__debugbreak();
 	}
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Logging]\n");
 		LogInfo("  calls=1\n");
@@ -380,7 +355,7 @@ void LoadConfigFile()
 	// Todo: No proxy for now, need to add to InitD310
 
 	//GetPrivateProfileString(L"System", L"proxy_D3D10", 0, DLL_PATH, MAX_PATH, iniFile);
-	//if (gLogFile)
+	//if (LogFile)
 	//{
 	//	LogInfo("[System]\n");
 	//	if (!DLL_PATH) LogInfoW(L"  proxy_D3D10=%s\n", DLL_PATH);
@@ -400,7 +375,7 @@ void LoadConfigFile()
 	G->gForceStereo = GetPrivateProfileInt(L"Device", L"force_stereo", 0, iniFile) == 1;
 	bool allowWindowCommands = GetPrivateProfileInt(L"Device", L"allow_windowcommands", 0, iniFile) == 1; // in DXGI dll
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Device]\n");
 		if (G->SCREEN_WIDTH != -1) LogInfo("  width=%d\n", G->SCREEN_WIDTH);
@@ -418,7 +393,7 @@ void LoadConfigFile()
 	G->gSurfaceCreateMode = GetPrivateProfileInt(L"Stereo", L"surface_createmode", -1, iniFile);
 	G->gSurfaceSquareCreateMode = GetPrivateProfileInt(L"Stereo", L"surface_square_createmode", -1, iniFile);
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Stereo]\n");
 		if (automaticMode) LogInfo("  automatic_mode=1\n");
@@ -469,7 +444,7 @@ void LoadConfigFile()
 	G->EXPORT_HLSL = GetPrivateProfileInt(L"Rendering", L"export_hlsl", 0, iniFile);
 	G->DumpUsage = GetPrivateProfileInt(L"Rendering", L"dump_usage", 0, iniFile) == 1;
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Rendering]\n");
 		if (G->SHADER_PATH[0])
@@ -490,35 +465,35 @@ void LoadConfigFile()
 
 
 	// Automatic section 
-	G->FIX_SV_Position = GetPrivateProfileInt(L"Rendering", L"fix_sv_position", 0, iniFile) == 1;
-	G->FIX_Light_Position = GetPrivateProfileInt(L"Rendering", L"fix_light_position", 0, iniFile) == 1;
-	G->FIX_Recompile_VS = GetPrivateProfileInt(L"Rendering", L"recompile_all_vs", 0, iniFile) == 1;
+	G->decompiler_settings.fixSvPosition = GetPrivateProfileInt(L"Rendering", L"fix_sv_position", 0, iniFile) == 1;
+	G->decompiler_settings.fixLightPosition = GetPrivateProfileInt(L"Rendering", L"fix_light_position", 0, iniFile) == 1;
+	G->decompiler_settings.recompileVs = GetPrivateProfileInt(L"Rendering", L"recompile_all_vs", 0, iniFile) == 1;
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_DepthTexture1", 0, setting, MAX_PATH, iniFile))
 	{
 		char buf[MAX_PATH];
 		wcstombs(buf, setting, MAX_PATH);
 		char *end = RightStripA(buf);
-		G->ZRepair_DepthTextureReg1 = *end; *(end - 1) = 0;
+		G->decompiler_settings.ZRepair_DepthTextureReg1 = *end; *(end - 1) = 0;
 		char *start = buf; while (isspace(*start)) start++;
-		G->ZRepair_DepthTexture1 = start;
+		G->decompiler_settings.ZRepair_DepthTexture1 = start;
 	}
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_DepthTexture2", 0, setting, MAX_PATH, iniFile))
 	{
 		char buf[MAX_PATH];
 		wcstombs(buf, setting, MAX_PATH);
 		char *end = RightStripA(buf);
-		G->ZRepair_DepthTextureReg2 = *end; *(end - 1) = 0;
+		G->decompiler_settings.ZRepair_DepthTextureReg2 = *end; *(end - 1) = 0;
 		char *start = buf; while (isspace(*start)) start++;
-		G->ZRepair_DepthTexture2 = start;
+		G->decompiler_settings.ZRepair_DepthTexture2 = start;
 	}
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_ZPosCalc1", 0, setting, MAX_PATH, iniFile))
-		G->ZRepair_ZPosCalc1 = readStringParameter(setting);
+		G->decompiler_settings.ZRepair_ZPosCalc1 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_ZPosCalc2", 0, setting, MAX_PATH, iniFile))
-		G->ZRepair_ZPosCalc2 = readStringParameter(setting);
+		G->decompiler_settings.ZRepair_ZPosCalc2 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_PositionTexture", 0, setting, MAX_PATH, iniFile))
-		G->ZRepair_PositionTexture = readStringParameter(setting);
+		G->decompiler_settings.ZRepair_PositionTexture = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_PositionCalc", 0, setting, MAX_PATH, iniFile))
-		G->ZRepair_WorldPosCalc = readStringParameter(setting);
+		G->decompiler_settings.ZRepair_WorldPosCalc = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ZRepair_Dependencies1", 0, setting, MAX_PATH, iniFile))
 	{
 		char buf[MAX_PATH];
@@ -527,7 +502,7 @@ void LoadConfigFile()
 		while (*start)
 		{
 			char *end = start; while (*end != ',' && *end && *end != ' ') ++end;
-			G->ZRepair_Dependencies1.push_back(string(start, end));
+			G->decompiler_settings.ZRepair_Dependencies1.push_back(string(start, end));
 			start = end; if (*start == ',') ++start;
 		}
 	}
@@ -539,7 +514,7 @@ void LoadConfigFile()
 		while (*start)
 		{
 			char *end = start; while (*end != ',' && *end && *end != ' ') ++end;
-			G->ZRepair_Dependencies2.push_back(string(start, end));
+			G->decompiler_settings.ZRepair_Dependencies2.push_back(string(start, end));
 			start = end; if (*start == ',') ++start;
 		}
 	}
@@ -551,7 +526,7 @@ void LoadConfigFile()
 		while (*start)
 		{
 			char *end = start; while (*end != ',' && *end && *end != ' ') ++end;
-			G->InvTransforms.push_back(string(start, end));
+			G->decompiler_settings.InvTransforms.push_back(string(start, end));
 			start = end; if (*start == ',') ++start;
 		}
 	}
@@ -562,21 +537,21 @@ void LoadConfigFile()
 		G->ZBufferHashToInject = (UINT64(hashHi) << 32) | UINT64(hashLo);
 	}
 	if (GetPrivateProfileString(L"Rendering", L"fix_BackProjectionTransform1", 0, setting, MAX_PATH, iniFile))
-		G->BackProject_Vector1 = readStringParameter(setting);
+		G->decompiler_settings.BackProject_Vector1 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_BackProjectionTransform2", 0, setting, MAX_PATH, iniFile))
-		G->BackProject_Vector2 = readStringParameter(setting);
+		G->decompiler_settings.BackProject_Vector2 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ObjectPosition1", 0, setting, MAX_PATH, iniFile))
-		G->ObjectPos_ID1 = readStringParameter(setting);
+		G->decompiler_settings.ObjectPos_ID1 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ObjectPosition2", 0, setting, MAX_PATH, iniFile))
-		G->ObjectPos_ID2 = readStringParameter(setting);
+		G->decompiler_settings.ObjectPos_ID2 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ObjectPosition1Multiplier", 0, setting, MAX_PATH, iniFile))
-		G->ObjectPos_MUL1 = readStringParameter(setting);
+		G->decompiler_settings.ObjectPos_MUL1 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_ObjectPosition2Multiplier", 0, setting, MAX_PATH, iniFile))
-		G->ObjectPos_MUL2 = readStringParameter(setting);
+		G->decompiler_settings.ObjectPos_MUL2 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_MatrixOperand1", 0, setting, MAX_PATH, iniFile))
-		G->MatrixPos_ID1 = readStringParameter(setting);
+		G->decompiler_settings.MatrixPos_ID1 = readStringParameter(setting);
 	if (GetPrivateProfileString(L"Rendering", L"fix_MatrixOperand1Multiplier", 0, setting, MAX_PATH, iniFile))
-		G->MatrixPos_MUL1 = readStringParameter(setting);
+		G->decompiler_settings.MatrixPos_MUL1 = readStringParameter(setting);
 
 	// Todo: finish logging all these settings
 	LogInfo("  ... missing automatic ini section\n");
@@ -640,7 +615,7 @@ void LoadConfigFile()
 			G->iniParams.w = stof(setting);
 	}
 
-	if (gLogFile &&
+	if (LogFile &&
 		(G->iniParams.x != FLT_MAX) || (G->iniParams.y != FLT_MAX) || (G->iniParams.z != FLT_MAX) || (G->iniParams.w != FLT_MAX))
 	{
 		LogInfo("[Constants]\n");

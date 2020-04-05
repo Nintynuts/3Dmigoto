@@ -1,10 +1,14 @@
 #include "lock.h"
 #include "overlay.h"
+#include <log.h>
 
 #include <psapi.h>
+#include <intrin.h>
 #include <inttypes.h>
 #include <unordered_map>
 #include <vector>
+#include <unordered_set>
+#include <set>
 
 // This implements a lock dependency checker to detect possible deadlock
 // scenarios even if no deadlock was actually hit. It is inspired by the
@@ -51,7 +55,6 @@
 // This should also help greatly increase our confidence that we haven't
 // introduced any new locking bugs when splitting up 3DMigoto's lock or working
 // with code that uses it.
-
 
 static void(__stdcall *_EnterCriticalSection)(CRITICAL_SECTION *lock) = EnterCriticalSection;
 static void(__stdcall *_LeaveCriticalSection)(CRITICAL_SECTION *lock) = LeaveCriticalSection;

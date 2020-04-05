@@ -1,13 +1,12 @@
-#include <util.h>
+#include "util.h"
 
 #include <sddl.h>
 #include <io.h>
 #include <fcntl.h>
 #include <Dbghelp.h>
+#include <d3d9.h>
 
-#include "DirectX11\HackerDevice.h"
-#include "DirectX11\HackerContext.h"
-
+#include "Overlay.h"
 
 // Sometimes game directories get funny permissions that cause us problems. I
 // have no clue how or why this happens, and the usual way to deal with it is

@@ -9,6 +9,7 @@
 
 #include "HackerDevice.h"
 //#include "ResourceHash.h"
+#include "..\HackingCommon\globals_common.h"
 #include "Globals.h"
 
 // {A3046B1E-336B-4D90-9FD6-234BC09B8687}
@@ -118,7 +119,6 @@ private:
 
 	// These are per-context, moved from globals.h:
 	uint32_t mCurrentVertexBuffers[D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
-	uint32_t mCurrentIndexBuffer; // Only valid while hunting=1
 	std::vector<ID3D11Resource *> mCurrentRenderTargets;
 	ID3D11Resource *mCurrentDepthTarget;
 	UINT mCurrentPSUAVStartSlot;
@@ -155,36 +155,34 @@ private:
 	ID3D11PixelShader* SwitchPSShader(ID3D11PixelShader *shader);
 	ID3D11VertexShader* SwitchVSShader(ID3D11VertexShader *shader);
 	void RecordDepthStencil(ID3D11DepthStencilView *target);
-	template <void (__stdcall ID3D11DeviceContext::*GetShaderResources)(THIS_
+
+	template <typename Shader, void(__stdcall ID3D11DeviceContext::* GetShaderResources)(THIS_
 		UINT StartSlot,
 		UINT NumViews,
-		ID3D11ShaderResourceView **ppShaderResourceViews)>
-	void RecordShaderResourceUsage(std::map<UINT64, ShaderInfoData> &ShaderInfo, UINT64 currentShader);
-	void _RecordShaderResourceUsage(ShaderInfoData *shader_info,
+		ID3D11ShaderResourceView** ppShaderResourceViews)>
+	void RecordShaderResourceUsage(ShaderResourceSelection<UINT64, ID3D11Resource, Shader> &shader);
+
+	void _RecordShaderResourceUsage(ShaderInfoData& shader_info,
 			ID3D11ShaderResourceView *views[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]);
 	void RecordGraphicsShaderStats();
 	void RecordComputeShaderStats();
-	void RecordPeerShaders(std::set<UINT64> *PeerShaders, UINT64 this_shader_hash);
 	void RecordRenderTargetInfo(ID3D11RenderTargetView *target, UINT view_num);
 	ID3D11Resource* RecordResourceViewStats(ID3D11View *view, std::set<uint32_t> *resource_info);
 
 	// Templates to reduce duplicated code:
-	template <class ID3D11Shader,
+	template <class Shader,
 		 void (__stdcall ID3D11DeviceContext::*OrigSetShader)(THIS_
-				 ID3D11Shader *pShader,
+				 Shader *pShader,
 				 ID3D11ClassInstance *const *ppClassInstances,
 				 UINT NumClassInstances)
 		 >
 	STDMETHODIMP_(void) SetShader(THIS_
 		/* [annotation] */
-		__in_opt ID3D11Shader *pShader,
+		__in_opt Shader *pShader,
 		/* [annotation] */
 		__in_ecount_opt(NumClassInstances) ID3D11ClassInstance *const *ppClassInstances,
 		UINT NumClassInstances,
-		std::set<UINT64> *visitedShaders,
-		UINT64 selectedShader,
-		UINT64 *currentShaderHash,
-		ID3D11Shader **currentShaderHandle);
+		ShaderResourceSelection_(Shader)& shaderType);
 	template <void (__stdcall ID3D11DeviceContext::*OrigSetShaderResources)(THIS_
 			UINT StartSlot,
 			UINT NumViews,
@@ -195,18 +193,6 @@ private:
 			UINT NumViews,
 			ID3D11ShaderResourceView *const *ppShaderResourceViews)>
 	void SetShaderResources(UINT StartSlot, UINT NumViews, ID3D11ShaderResourceView *const *ppShaderResourceViews);
-
-protected:
-	// Allow FrameAnalysisContext access to these as an interim measure
-	// until it has been further decoupled from HackerContext. Be wary of
-	// relying on these - they will be zero in release mode with no
-	// ShaderOverrides / ShaderRegex:
-	UINT64 mCurrentVertexShader;
-	UINT64 mCurrentHullShader;
-	UINT64 mCurrentDomainShader;
-	UINT64 mCurrentGeometryShader;
-	UINT64 mCurrentPixelShader;
-	UINT64 mCurrentComputeShader;
 
 public:
 	HackerContext(ID3D11Device1 *pDevice1, ID3D11DeviceContext1 *pContext1);
@@ -224,15 +210,6 @@ public:
 	virtual void FrameAnalysisTrigger(FrameAnalysisOptions new_options) {};
 	virtual void FrameAnalysisDump(ID3D11Resource *resource, FrameAnalysisOptions options,
 		const wchar_t *target, DXGI_FORMAT format, UINT stride, UINT offset) {};
-
-	// These are the shaders the game has set, which may be different from
-	// the ones we have bound to the pipeline:
-	ID3D11VertexShader *mCurrentVertexShaderHandle;
-	ID3D11PixelShader *mCurrentPixelShaderHandle;
-	ID3D11ComputeShader *mCurrentComputeShaderHandle;
-	ID3D11GeometryShader *mCurrentGeometryShaderHandle;
-	ID3D11DomainShader *mCurrentDomainShaderHandle;
-	ID3D11HullShader *mCurrentHullShaderHandle;
 
 	/*** IUnknown methods ***/
 

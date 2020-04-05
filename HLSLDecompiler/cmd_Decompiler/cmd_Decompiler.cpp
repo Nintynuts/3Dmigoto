@@ -9,7 +9,7 @@
 #include "DecompileHLSL.h"
 #include "version.h"
 #include "log.h"
-#include "util.h"
+#include "../DirectX11/util.h"
 #include "shader.h"
 
 using namespace std;

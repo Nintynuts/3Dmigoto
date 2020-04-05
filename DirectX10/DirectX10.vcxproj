@@ -28,6 +28,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\HLSLDecompiler\DecompileHLSL.cpp" />
+    <ClCompile Include="HackerMultiThreadDevice.cpp" />
+    <ClCompile Include="HackerDevice.cpp" />
     <ClCompile Include="d3d10Wrapper.cpp" />
     <ClCompile Include="IniHandler.cpp" />
     <ClCompile Include="input.cpp" />
@@ -38,22 +40,22 @@
     <None Include="d3d10Wrapper.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\HLSLDecompiler\DecompileHLSL.h" />
-    <ClInclude Include="..\log.h" />
-    <ClInclude Include="d3d10Wrapper.h" />
-    <ClInclude Include="d3d10WrapperDevice.h" />
-    <ClInclude Include="Direct3D10Device.h" />
+    <ClInclude Include="D3D10Base.h" />
+    <ClInclude Include="HackerMultiThreadDevice.h" />
+    <ClInclude Include="HackerDevice.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="Hunting.h" />
     <ClInclude Include="IniHandler.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="nvstereo.h" />
     <ClInclude Include="Override.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BinaryDecompiler\BinaryDecompiler.vcxproj">
       <Project>{258d0ad2-b762-41e3-a0c1-cf831d859da4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\HackingCommon\HackingCommon.vcxproj">
+      <Project>{199ddcef-bcdb-42e8-b6a8-79a0507aa169}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -127,32 +129,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>d3d10</TargetName>
-    <IncludePath>$(SolutionDir)BinaryDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(SolutionDir)HLSLDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>d3d10</TargetName>
-    <IncludePath>$(SolutionDir)BinaryDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(SolutionDir)HLSLDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>d3d10</TargetName>
-    <IncludePath>$(SolutionDir)BinaryDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(SolutionDir)HLSLDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>d3d10</TargetName>
-    <IncludePath>$(SolutionDir)BinaryDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(SolutionDir)HLSLDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>d3d10</TargetName>
-    <IncludePath>$(SolutionDir)BinaryDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(SolutionDir)HLSLDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>d3d10</TargetName>
-    <IncludePath>$(SolutionDir)BinaryDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(SolutionDir)HLSLDecompiler;$(SolutionDir)BinaryDecompiler\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -170,9 +172,7 @@
       <ModuleDefinitionFile>d3d10Wrapper.def</ModuleDefinitionFile>
       <AdditionalDependencies>..\nvapi.lib;dinput8.lib;dxguid.lib;comctl32.lib;XINPUT9_1_0.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy /Y $(OutDir)d3d10.dll T:\SteamLibrary\SteamApps\common\Cryostasis\</Command>
-    </PostBuildEvent>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -198,7 +198,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;NDEBUG;_WINDOWS;_USRDLL;DIRECTX10_EXPORTS;MIGOTO_DX=10;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
@@ -240,7 +239,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;NDEBUG;_WINDOWS;_USRDLL;DIRECTX10_EXPORTS;MIGOTO_DX=10;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>

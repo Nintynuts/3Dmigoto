@@ -8,8 +8,6 @@
 void InitD311();
 void DestroyDLL();
 
-void NvAPIOverride();
-
 extern "C" HMODULE (__stdcall *fnOrigLoadLibraryExW)(
 	_In_       LPCTSTR lpFileName,
 	_Reserved_ HANDLE  hFile,

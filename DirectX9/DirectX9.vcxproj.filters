@@ -7,7 +7,6 @@
     <ClInclude Include="d3d9Wrapper.h" />
     <ClInclude Include="Direct3D9Functions.h" />
     <ClInclude Include="Direct3DDevice9Functions.h" />
-    <ClInclude Include="Main.h" />
     <ClInclude Include="Direct3DSwapChain9Functions.h" />
     <ClInclude Include="Direct3DSurface9Functions.h" />
     <ClInclude Include="Direct3DVertexDeclaration9Functions.h" />
@@ -18,7 +17,6 @@
     <ClInclude Include="Direct3DVertexShader9Functions.h" />
     <ClInclude Include="Direct3DPixelShader9Functions.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="..\IDirect3DUnknown.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="d3d9Wrapper.def" />

@@ -1,28 +1,67 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="d3d10Wrapper.cpp" />
-    <ClCompile Include="..\HLSLDecompiler\DecompileHLSL.cpp" />
-    <ClCompile Include="Override.cpp" />
-    <ClCompile Include="input.cpp" />
-    <ClCompile Include="Hunting.cpp" />
-    <ClCompile Include="IniHandler.cpp" />
+    <ClCompile Include="HackerMultiThreadDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d10Wrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HLSLDecompiler\DecompileHLSL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hunting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Override.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HackerDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="d3d10Wrapper.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="d3d10Wrapper.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="Direct3D10Device.h" />
-    <ClInclude Include="d3d10WrapperDevice.h" />
-    <ClInclude Include="globals.h" />
-    <ClInclude Include="..\HLSLDecompiler\DecompileHLSL.h" />
-    <ClInclude Include="Override.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="IniHandler.h" />
-    <ClInclude Include="Hunting.h" />
-    <ClInclude Include="..\log.h" />
-    <ClInclude Include="nvstereo.h" />
+    <ClInclude Include="HackerMultiThreadDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D10Base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HackerDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hunting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Override.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{b0a842fc-cb05-4432-94b6-034b6cf39285}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{810b4a7d-3b88-4af3-8186-4e61296709f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

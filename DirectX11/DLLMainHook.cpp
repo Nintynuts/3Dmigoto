@@ -1,8 +1,9 @@
 #include "DLLMainHook.h"
 
+#include <ini_parser_lite.h>
+
 #include "HookedDXGI.h"
 #include "D3D11Wrapper.h"
-#include "util_min.h"
 #include "globals.h"
 
 HINSTANCE migoto_handle;

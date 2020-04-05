@@ -6,6 +6,7 @@
 #include "FrameAnalysis.h"
 #include "Globals.h"
 #include "input.h"
+#include "type_name_dx11.h"
 
 #include <ScreenGrab.h>
 #include <wincodec.h>
@@ -18,6 +19,8 @@
 #include <shlguid.h>
 
 #include <stdexcept>
+
+#include <texture.h>
 
 // Flag introduced in Windows 10 Fall Creators Update
 // Someone was clearly on crack when they decided this flag was necessary
@@ -1997,18 +2000,18 @@ HRESULT FrameAnalysisContext::FrameAnalysisFilename(wchar_t *filename, size_t si
 		StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"@%p", handle);
 
 	if (compute) {
-		StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-cs=%016I64x", mCurrentComputeShader);
+		StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-cs=%016I64x", G->mComputeShaders.mCurrent);
 	} else {
-		if (mCurrentVertexShader)
-			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-vs=%016I64x", mCurrentVertexShader);
-		if (mCurrentHullShader)
-			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-hs=%016I64x", mCurrentHullShader);
-		if (mCurrentDomainShader)
-			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-ds=%016I64x", mCurrentDomainShader);
-		if (mCurrentGeometryShader)
-			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-gs=%016I64x", mCurrentGeometryShader);
-		if (mCurrentPixelShader)
-			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-ps=%016I64x", mCurrentPixelShader);
+		if (G->mVertexShaders.mCurrent)
+			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-vs=%016I64x", G->mVertexShaders.mCurrent);
+		if (G->mHullShaders.mCurrent)
+			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-hs=%016I64x", G->mHullShaders.mCurrent);
+		if (G->mDomainShaders.mCurrent)
+			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-ds=%016I64x", G->mDomainShaders.mCurrent);
+		if (G->mGeometryShaders.mCurrent)
+			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-gs=%016I64x", G->mGeometryShaders.mCurrent);
+		if (G->mPixelShaders.mCurrent)
+			StringCchPrintfExW(pos, rem, &pos, &rem, NULL, L"-ps=%016I64x", G->mPixelShaders.mCurrent);
 	}
 
 	hr = StringCchPrintfW(pos, rem, L".XXX");
@@ -2393,28 +2396,28 @@ void FrameAnalysisContext::DumpCBs(bool compute)
 	ID3D11Buffer *buffers[D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT];
 
 	if (compute) {
-		if (mCurrentComputeShader) {
+		if (G->mComputeShaders.mCurrent) {
 			GetPassThroughOrigContext1()->CSGetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, buffers);
 			_DumpCBs('c', compute, buffers);
 		}
 	} else {
-		if (mCurrentVertexShader) {
+		if (G->mVertexShaders.mCurrent) {
 			GetPassThroughOrigContext1()->VSGetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, buffers);
 			_DumpCBs('v', compute, buffers);
 		}
-		if (mCurrentHullShader) {
+		if (G->mHullShaders.mCurrent) {
 			GetPassThroughOrigContext1()->HSGetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, buffers);
 			_DumpCBs('h', compute, buffers);
 		}
-		if (mCurrentDomainShader) {
+		if (G->mDomainShaders.mCurrent) {
 			GetPassThroughOrigContext1()->DSGetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, buffers);
 			_DumpCBs('d', compute, buffers);
 		}
-		if (mCurrentGeometryShader) {
+		if (G->mGeometryShaders.mCurrent) {
 			GetPassThroughOrigContext1()->GSGetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, buffers);
 			_DumpCBs('g', compute, buffers);
 		}
-		if (mCurrentPixelShader) {
+		if (G->mPixelShaders.mCurrent) {
 			GetPassThroughOrigContext1()->PSGetConstantBuffers(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT, buffers);
 			_DumpCBs('p', compute, buffers);
 		}
@@ -2561,28 +2564,28 @@ void FrameAnalysisContext::DumpTextures(bool compute)
 	ID3D11ShaderResourceView *views[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
 	if (compute) {
-		if (mCurrentComputeShader) {
+		if (G->mComputeShaders.mCurrent) {
 			GetPassThroughOrigContext1()->CSGetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, views);
 			_DumpTextures('c', compute, views);
 		}
 	} else {
-		if (mCurrentVertexShader) {
+		if (G->mVertexShaders.mCurrent) {
 			GetPassThroughOrigContext1()->VSGetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, views);
 			_DumpTextures('v', compute, views);
 		}
-		if (mCurrentHullShader) {
+		if (G->mHullShaders.mCurrent) {
 			GetPassThroughOrigContext1()->HSGetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, views);
 			_DumpTextures('h', compute, views);
 		}
-		if (mCurrentDomainShader) {
+		if (G->mDomainShaders.mCurrent) {
 			GetPassThroughOrigContext1()->DSGetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, views);
 			_DumpTextures('d', compute, views);
 		}
-		if (mCurrentGeometryShader) {
+		if (G->mGeometryShaders.mCurrent) {
 			GetPassThroughOrigContext1()->GSGetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, views);
 			_DumpTextures('g', compute, views);
 		}
-		if (mCurrentPixelShader) {
+		if (G->mPixelShaders.mCurrent) {
 			GetPassThroughOrigContext1()->PSGetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, views);
 			_DumpTextures('p', compute, views);
 		}

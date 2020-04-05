@@ -33,9 +33,6 @@
     <None Include="NVApiDecorator.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\nvapi.h" />
-    <ClInclude Include="..\nvstereo.h" />
-    <ClInclude Include="..\version.h" />
     <ClInclude Include="Main.h" />
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +40,11 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">WIN64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WIN64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HackingCommon\HackingCommon.vcxproj">
+      <Project>{199ddcef-bcdb-42e8-b6a8-79a0507aa169}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{374CBD29-E904-48E5-BF6F-A464B1EDCA86}</ProjectGuid>
@@ -111,41 +113,41 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
     <TargetName>nvapi</TargetName>
     <OutDir>$(SolutionDir)x32\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x32\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
     <TargetName>nvapi64</TargetName>
     <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
     <TargetName>nvapi</TargetName>
     <OutDir>$(SolutionDir)x32\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x32\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
     <TargetName>nvapi</TargetName>
     <OutDir>$(SolutionDir)x32\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x32\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
     <TargetName>nvapi64</TargetName>
     <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)HackingCommon;$(SolutionDir)crc32c-hw-1.0.5\include;$(IncludePath)</IncludePath>
     <TargetName>nvapi64</TargetName>
     <OutDir>$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)x64\$(Configuration)\</IntDir>
@@ -188,7 +190,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=_WIN32_WINNT_WIN7;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
@@ -226,7 +227,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=_WIN32_WINNT_WIN7;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>

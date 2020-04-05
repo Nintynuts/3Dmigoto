@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Main.h"
+#include "D3D10Base.h"
 
 // The "input" files are a set of objects to handle user input for both gaming 
 // purposes and for tool purposes, like hunting for shaders.
@@ -22,8 +22,8 @@
 
 class InputListener {
 public:
-	virtual void DownEvent(D3D10Base::ID3D10Device *device) = 0;
-	virtual void UpEvent(D3D10Base::ID3D10Device *device);
+	virtual void DownEvent(ID3D10Device *device) = 0;
+	virtual void UpEvent(ID3D10Device *device);
 };
 
 
@@ -33,7 +33,7 @@ public:
 // callback function may be used with this type signature and registered via
 // RegisterIniKeyBinding:
 
-typedef void(*InputCallback)(D3D10Base::ID3D10Device *device, void *private_data);
+typedef void(*InputCallback)(ID3D10Device *device, void *private_data);
 
 // -----------------------------------------------------------------------------
 // InputCallbacks is a key descendant of InputListener, and is used primarily
@@ -50,8 +50,8 @@ private:
 public:
 	InputCallbacks(InputCallback down_cb, InputCallback up_cb, void *private_data);
 
-	void DownEvent(D3D10Base::ID3D10Device *device) override;
-	void UpEvent(D3D10Base::ID3D10Device *device) override;
+	void DownEvent(ID3D10Device *device) override;
+	void UpEvent(ID3D10Device *device) override;
 };
 
 
@@ -107,7 +107,7 @@ public:
 	InputAction(InputButton *button, InputListener *listener);
 	virtual ~InputAction();
 
-	virtual bool Dispatch(D3D10Base::ID3D10Device *device);
+	virtual bool Dispatch(ID3D10Device *device);
 };
 
 // -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ private:
 
 public:
 	RepeatingInputAction(InputButton *button, InputListener *listener, int repeat);
-	bool Dispatch(D3D10Base::ID3D10Device *device) override;
+	bool Dispatch(ID3D10Device *device) override;
 };
 
 // -----------------------------------------------------------------------------
@@ -134,7 +134,7 @@ private:
 	ULONGLONG state_change_time;
 public:
 	DelayedInputAction(InputButton *button, InputListener *listener, int delayDown, int delayUp);
-	bool Dispatch(D3D10Base::ID3D10Device *device) override;
+	bool Dispatch(ID3D10Device *device) override;
 };
 
 
@@ -155,4 +155,4 @@ bool RegisterIniKeyBinding(LPCWSTR app, LPCWSTR key, LPCWSTR ini,
 // Note - this is not safe to call from within an input callback!
 void ClearKeyBindings();
 
-bool DispatchInputEvents(D3D10Base::ID3D10Device *device);
+bool DispatchInputEvents(ID3D10Device *device);

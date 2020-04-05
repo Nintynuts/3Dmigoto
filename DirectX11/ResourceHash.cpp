@@ -1,8 +1,10 @@
 #include "ResourceHash.h"
 
 #include <INITGUID.h>
-#include "log.h"
-#include "util.h"
+#include <log.h>
+#include <util.h>
+#include <texture.h>
+
 #include "globals.h"
 #include "profiling.h"
 #include "overlay.h"
@@ -814,12 +816,11 @@ uint32_t CalcTexture2DDataHashAccurate(
 // lockdep to statically prove this is called with the lock held?
 ResourceHandleInfo* GetResourceHandleInfo(ID3D11Resource *resource)
 {
-	std::unordered_map<ID3D11Resource *, ResourceHandleInfo>::iterator j;
 	ResourceHandleInfo* ret = NULL;
 
 	EnterCriticalSectionPretty(&G->mResourcesLock);
 
-	j = lookup_resource_handle_info(resource);
+	auto j = lookup_resource_handle_info(resource);
 	if (j != G->mResources.end())
 		ret = &j->second;
 

@@ -1,27 +1,27 @@
 
-D3D9Wrapper::IDirect3D9::IDirect3D9(D3D9Base::LPDIRECT3D9EX pD3D)
-    : D3D9Wrapper::IDirect3D9Base((IUnknown*) pD3D)
+Hacker9::Hacker9(LPDIRECT3D9EX pD3D)
+    : Hacker9Base((IUnknown*) pD3D)
 {
 }
 
-D3D9Wrapper::IDirect3D9* D3D9Wrapper::IDirect3D9::GetDirect3D(D3D9Base::LPDIRECT3D9EX pD3D)
+Hacker9* Hacker9::GetDirect3D(LPDIRECT3D9EX pD3D)
 {
-    D3D9Wrapper::IDirect3D9* p = (D3D9Wrapper::IDirect3D9*) m_List.GetDataPtr(pD3D);
+    Hacker9* p = (Hacker9*) m_List.GetDataPtr(pD3D);
     if (!p)
     {
-        p = new D3D9Wrapper::IDirect3D9(pD3D);
+        p = new Hacker9(pD3D);
 		if (pD3D) m_List.AddMember(pD3D,p);
     }
     return p;
 }
 
-STDMETHODIMP_(ULONG) D3D9Wrapper::IDirect3D9Base::AddRef(THIS)
+STDMETHODIMP_(ULONG) Hacker9Base::AddRef(THIS)
 {
 	++m_ulRef;
 	return m_pUnk->AddRef();
 }
 
-STDMETHODIMP_(ULONG) D3D9Wrapper::IDirect3D9Base::Release(THIS)
+STDMETHODIMP_(ULONG) Hacker9Base::Release(THIS)
 {
 	LogDebug("ID3D9Device::Release handle=%x, counter=%d, this=%x\n", m_pUnk, m_ulRef, this);
 
@@ -32,7 +32,7 @@ STDMETHODIMP_(ULONG) D3D9Wrapper::IDirect3D9Base::Release(THIS)
 
     if (ulRef == 0)
     {
-		if (!LogDebug) LogInfo("ID3D9Device::Release handle=%x, counter=%d, internal counter = %d\n", m_pUnk, m_ulRef, ulRef);
+		if (!gLogDebug) LogInfo("ID3D9Device::Release handle=%x, counter=%d, internal counter = %d\n", m_pUnk, m_ulRef, ulRef);
 		LogInfo("  deleting self\n");
 
 		if (m_pUnk) m_List.DeleteMember(m_pUnk); 
@@ -43,16 +43,16 @@ STDMETHODIMP_(ULONG) D3D9Wrapper::IDirect3D9Base::Release(THIS)
     return ulRef;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9Base::RegisterSoftwareDevice(THIS_ void* pInitializeFunction)
+STDMETHODIMP Hacker9Base::RegisterSoftwareDevice(THIS_ void* pInitializeFunction)
 {
-	LogInfo("IDirect3D9::RegisterSoftwareDevice called\n");
+	LogInfo("Hacker9::RegisterSoftwareDevice called\n");
 	
-	return ((IDirect3D9*)m_pUnk)->RegisterSoftwareDevice(pInitializeFunction);
+	return ((Hacker9*)m_pUnk)->RegisterSoftwareDevice(pInitializeFunction);
 }
 
-STDMETHODIMP_(UINT) D3D9Wrapper::IDirect3D9::GetAdapterCount(THIS)
+STDMETHODIMP_(UINT) Hacker9::GetAdapterCount(THIS)
 {
-	LogInfo("IDirect3D9::GetAdapterCount called\n");
+	LogInfo("Hacker9::GetAdapterCount called\n");
 	
 	UINT ret = GetDirect3D9()->GetAdapterCount();
 	LogInfo("  return value = %d\n", ret);
@@ -60,9 +60,9 @@ STDMETHODIMP_(UINT) D3D9Wrapper::IDirect3D9::GetAdapterCount(THIS)
 	return ret;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::GetAdapterIdentifier(THIS_ UINT Adapter,DWORD Flags,D3D9Base::D3DADAPTER_IDENTIFIER9* pIdentifier)
+STDMETHODIMP Hacker9::GetAdapterIdentifier(THIS_ UINT Adapter,DWORD Flags,D3DADAPTER_IDENTIFIER9* pIdentifier)
 {
-	LogInfo("IDirect3D9::GetAdapterIdentifier called\n");
+	LogInfo("Hacker9::GetAdapterIdentifier called\n");
 	
 	HRESULT ret = GetDirect3D9()->GetAdapterIdentifier(Adapter, Flags, pIdentifier);
 	if (ret == S_OK && LogFile)
@@ -72,9 +72,9 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::GetAdapterIdentifier(THIS_ UINT Adapter,DW
 	return ret;
 }
 
-STDMETHODIMP_(UINT) D3D9Wrapper::IDirect3D9::GetAdapterModeCount(THIS_ UINT Adapter,D3D9Base::D3DFORMAT Format)
+STDMETHODIMP_(UINT) Hacker9::GetAdapterModeCount(THIS_ UINT Adapter,D3DFORMAT Format)
 {
-	LogInfo("IDirect3D9::GetAdapterModeCount called\n");
+	LogInfo("Hacker9::GetAdapterModeCount called\n");
 	
 	UINT ret = GetDirect3D9()->GetAdapterModeCount(Adapter, Format);
 	LogInfo("  return value = %d\n", ret);
@@ -82,9 +82,9 @@ STDMETHODIMP_(UINT) D3D9Wrapper::IDirect3D9::GetAdapterModeCount(THIS_ UINT Adap
 	return ret;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::EnumAdapterModes(THIS_ UINT Adapter,D3D9Base::D3DFORMAT Format,UINT Mode,D3D9Base::D3DDISPLAYMODE* pMode)
+STDMETHODIMP Hacker9::EnumAdapterModes(THIS_ UINT Adapter,D3DFORMAT Format,UINT Mode,D3DDISPLAYMODE* pMode)
 {
-	LogInfo("IDirect3D9::EnumAdapterModes called: adapter #%d requested with mode #%d\n", Adapter, Mode);
+	LogInfo("Hacker9::EnumAdapterModes called: adapter #%d requested with mode #%d\n", Adapter, Mode);
 	
 	HRESULT hr = GetDirect3D9()->EnumAdapterModes(Adapter, Format, Mode, pMode);
 	if (hr == S_OK)
@@ -115,9 +115,9 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::EnumAdapterModes(THIS_ UINT Adapter,D3D9Ba
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::GetAdapterDisplayMode(THIS_ UINT Adapter,D3D9Base::D3DDISPLAYMODE* pMode)
+STDMETHODIMP Hacker9::GetAdapterDisplayMode(THIS_ UINT Adapter,D3DDISPLAYMODE* pMode)
 {
-	LogInfo("IDirect3D9::GetAdapterDisplayMode called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::GetAdapterDisplayMode called: adapter #%d\n", Adapter);
 	
 	HRESULT hr = GetDirect3D9()->GetAdapterDisplayMode(Adapter, pMode);
 	if (hr == S_OK && pMode)
@@ -146,48 +146,48 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::GetAdapterDisplayMode(THIS_ UINT Adapter,D
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CheckDeviceType(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DevType,D3D9Base::D3DFORMAT AdapterFormat,D3D9Base::D3DFORMAT BackBufferFormat,BOOL bWindowed)
+STDMETHODIMP Hacker9::CheckDeviceType(THIS_ UINT Adapter,D3DDEVTYPE DevType,D3DFORMAT AdapterFormat,D3DFORMAT BackBufferFormat,BOOL bWindowed)
 {
-	LogInfo("IDirect3D9::CheckDeviceType called with adapter=%d\n", Adapter);
+	LogInfo("Hacker9::CheckDeviceType called with adapter=%d\n", Adapter);
 
 	HRESULT hr = GetDirect3D9()->CheckDeviceType(Adapter, DevType, AdapterFormat, BackBufferFormat, bWindowed);
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CheckDeviceFormat(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,D3D9Base::D3DFORMAT AdapterFormat,DWORD Usage,D3D9Base::D3DRESOURCETYPE RType,D3D9Base::D3DFORMAT CheckFormat)
+STDMETHODIMP Hacker9::CheckDeviceFormat(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,D3DFORMAT AdapterFormat,DWORD Usage,D3DRESOURCETYPE RType,D3DFORMAT CheckFormat)
 {
-	LogInfo("IDirect3D9::CheckDeviceFormat called with adapter=%d\n", Adapter);
+	LogInfo("Hacker9::CheckDeviceFormat called with adapter=%d\n", Adapter);
 
 	HRESULT hr = GetDirect3D9()->CheckDeviceFormat(Adapter, DeviceType, AdapterFormat, Usage, RType, CheckFormat);
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CheckDeviceMultiSampleType(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,D3D9Base::D3DFORMAT SurfaceFormat,BOOL Windowed,D3D9Base::D3DMULTISAMPLE_TYPE MultiSampleType,DWORD* pQualityLevels)
+STDMETHODIMP Hacker9::CheckDeviceMultiSampleType(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,D3DFORMAT SurfaceFormat,BOOL Windowed,D3DMULTISAMPLE_TYPE MultiSampleType,DWORD* pQualityLevels)
 {
-	LogInfo("IDirect3D9::CheckDeviceMultiSampleType called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::CheckDeviceMultiSampleType called: adapter #%d\n", Adapter);
 
 	return GetDirect3D9()->CheckDeviceMultiSampleType(Adapter, DeviceType, SurfaceFormat, Windowed, MultiSampleType, pQualityLevels);
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CheckDepthStencilMatch(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,D3D9Base::D3DFORMAT AdapterFormat,D3D9Base::D3DFORMAT RenderTargetFormat,D3D9Base::D3DFORMAT DepthStencilFormat)
+STDMETHODIMP Hacker9::CheckDepthStencilMatch(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,D3DFORMAT AdapterFormat,D3DFORMAT RenderTargetFormat,D3DFORMAT DepthStencilFormat)
 {
-	LogInfo("IDirect3D9::CheckDepthStencilMatch called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::CheckDepthStencilMatch called: adapter #%d\n", Adapter);
 
 	HRESULT hr = GetDirect3D9()->CheckDepthStencilMatch(Adapter, DeviceType, AdapterFormat, RenderTargetFormat, DepthStencilFormat);
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CheckDeviceFormatConversion(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,D3D9Base::D3DFORMAT SourceFormat,D3D9Base::D3DFORMAT TargetFormat)
+STDMETHODIMP Hacker9::CheckDeviceFormatConversion(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,D3DFORMAT SourceFormat,D3DFORMAT TargetFormat)
 {
-	LogInfo("IDirect3D9::CheckDeviceFormatConversion called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::CheckDeviceFormatConversion called: adapter #%d\n", Adapter);
 
 	HRESULT hr = GetDirect3D9()->CheckDeviceFormatConversion(Adapter, DeviceType, SourceFormat, TargetFormat);
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::GetDeviceCaps(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,D3D9Base::D3DCAPS9* pCaps)
+STDMETHODIMP Hacker9::GetDeviceCaps(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,D3DCAPS9* pCaps)
 {
-	LogInfo("IDirect3D9::GetDeviceCaps called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::GetDeviceCaps called: adapter #%d\n", Adapter);
 
 	HRESULT hr = GetDirect3D9()->GetDeviceCaps(Adapter, DeviceType, pCaps);
 	LogInfo("  returns result = %x\n", hr);
@@ -195,23 +195,23 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::GetDeviceCaps(THIS_ UINT Adapter,D3D9Base:
 	return hr;
 }
 
-STDMETHODIMP_(HMONITOR) D3D9Wrapper::IDirect3D9::GetAdapterMonitor(THIS_ UINT Adapter)
+STDMETHODIMP_(HMONITOR) Hacker9::GetAdapterMonitor(THIS_ UINT Adapter)
 {
-	LogInfo("IDirect3D9::GetAdapterMonitor called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::GetAdapterMonitor called: adapter #%d\n", Adapter);
 
 	return GetDirect3D9()->GetAdapterMonitor(Adapter);
 }
 
 DWORD WINAPI DeviceCreateThread(LPVOID lpParam) 
 {
-	D3D9Wrapper::IDirect3DDevice9* newDevice = (D3D9Wrapper::IDirect3DDevice9*)lpParam;
+	HackerDevice9* newDevice = (HackerDevice9*)lpParam;
 	CheckDevice(newDevice);
 	return S_OK;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDeviceEx(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,HWND hFocusWindow,DWORD BehaviorFlags,D3D9Base::D3DPRESENT_PARAMETERS* pPresentationParameters,D3D9Base::D3DDISPLAYMODEEX* pFullscreenDisplayMode,D3D9Wrapper::IDirect3DDevice9** ppReturnedDeviceInterface)
+STDMETHODIMP Hacker9::CreateDeviceEx(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,HWND hFocusWindow,DWORD BehaviorFlags,D3DPRESENT_PARAMETERS* pPresentationParameters,D3DDISPLAYMODEEX* pFullscreenDisplayMode,HackerDevice9** ppReturnedDeviceInterface)
 {
-	LogInfo("IDirect3D9::CreateDevice called with parameters FocusWindow = %x\n", hFocusWindow);
+	LogInfo("Hacker9::CreateDevice called with parameters FocusWindow = %x\n", hFocusWindow);
 
 	if (pPresentationParameters)
 	{
@@ -272,7 +272,7 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDeviceEx(THIS_ UINT Adapter,D3D9Base
 
 		pFullscreenDisplayMode->Height = SCREEN_HEIGHT;
 	}
-	D3D9Base::D3DDISPLAYMODEEX fullScreenDisplayMode;
+	D3DDISPLAYMODEEX fullScreenDisplayMode;
 	if (pPresentationParameters && SCREEN_FULLSCREEN >= 0 && SCREEN_FULLSCREEN < 2)
 	{
 		LogInfo("    overriding full screen = %d\n", SCREEN_FULLSCREEN);
@@ -282,12 +282,12 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDeviceEx(THIS_ UINT Adapter,D3D9Base
 		{
 			LogInfo("    creating full screen parameter structure.\n");
 
-			fullScreenDisplayMode.Size = sizeof(D3D9Base::D3DDISPLAYMODEEX);
+			fullScreenDisplayMode.Size = sizeof(D3DDISPLAYMODEEX);
 			fullScreenDisplayMode.Format = pPresentationParameters->BackBufferFormat;
 			fullScreenDisplayMode.Height = pPresentationParameters->BackBufferHeight;
 			fullScreenDisplayMode.Width = pPresentationParameters->BackBufferWidth;
 			fullScreenDisplayMode.RefreshRate = pPresentationParameters->FullScreen_RefreshRateInHz;
-			fullScreenDisplayMode.ScanLineOrdering = D3D9Base::D3DSCANLINEORDERING_PROGRESSIVE;
+			fullScreenDisplayMode.ScanLineOrdering = D3DSCANLINEORDERING_PROGRESSIVE;
 			pFullscreenDisplayMode = &fullScreenDisplayMode;
 		}
 	}
@@ -316,17 +316,17 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDeviceEx(THIS_ UINT Adapter,D3D9Base
 		if (pPresentationParameters->EnableAutoDepthStencil != TRUE)
 		{
 			pPresentationParameters->EnableAutoDepthStencil = TRUE;
-			pPresentationParameters->AutoDepthStencilFormat = D3D9Base::D3DFMT_D24S8;
+			pPresentationParameters->AutoDepthStencilFormat = D3DFMT_D24S8;
 		}
-		pPresentationParameters->SwapEffect = D3D9Base::D3DSWAPEFFECT_DISCARD;
+		pPresentationParameters->SwapEffect = D3DSWAPEFFECT_DISCARD;
 		pPresentationParameters->PresentationInterval = 0; // D3DPRESENT_INTERVAL_DEFAULT
-		pPresentationParameters->BackBufferFormat = D3D9Base::D3DFMT_A8R8G8B8; // 21
+		pPresentationParameters->BackBufferFormat = D3DFMT_A8R8G8B8; // 21
 		pPresentationParameters->BackBufferCount = 1;
 	}
 	BehaviorFlags &= ~D3DCREATE_MULTITHREADED;
 	*/
 
-	D3D9Base::LPDIRECT3DDEVICE9EX baseDevice = NULL;
+	LPDIRECT3DDEVICE9EX baseDevice = NULL;
 	HRESULT hr = S_OK;
 	if (!gDelayDeviceCreation)
 	{
@@ -344,10 +344,10 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDeviceEx(THIS_ UINT Adapter,D3D9Base
 		LogInfo("  postponing device creation and returning only wrapper\n");
 	}
 
-	D3D9Wrapper::IDirect3DDevice9* newDevice = D3D9Wrapper::IDirect3DDevice9::GetDirect3DDevice(baseDevice);
+	HackerDevice9* newDevice = HackerDevice9::GetDirect3DDevice(baseDevice);
 	if (newDevice == NULL)
 	{
-		LogInfo("  error creating IDirect3DDevice9 wrapper.\n");
+		LogInfo("  error creating HackerDevice9 wrapper.\n");
 
 		if (baseDevice) 
 			baseDevice->Release();
@@ -372,51 +372,51 @@ STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDeviceEx(THIS_ UINT Adapter,D3D9Base
 	return hr;
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::CreateDevice(THIS_ UINT Adapter,D3D9Base::D3DDEVTYPE DeviceType,HWND hFocusWindow,DWORD BehaviorFlags,D3D9Base::D3DPRESENT_PARAMETERS* pPresentationParameters, D3D9Wrapper::IDirect3DDevice9** ppReturnedDeviceInterface)
+STDMETHODIMP Hacker9::CreateDevice(THIS_ UINT Adapter,D3DDEVTYPE DeviceType,HWND hFocusWindow,DWORD BehaviorFlags,D3DPRESENT_PARAMETERS* pPresentationParameters, HackerDevice9** ppReturnedDeviceInterface)
 {
-	LogInfo("IDirect3D9::CreateDevice called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::CreateDevice called: adapter #%d\n", Adapter);
 	LogInfo("  forwarding to CreateDeviceEx.\n");
 
-	D3D9Base::D3DDISPLAYMODEEX fullScreenDisplayMode;
-	fullScreenDisplayMode.Size = sizeof(D3D9Base::D3DDISPLAYMODEEX);
+	D3DDISPLAYMODEEX fullScreenDisplayMode;
+	fullScreenDisplayMode.Size = sizeof(D3DDISPLAYMODEEX);
 	if (pPresentationParameters)
 	{
 		fullScreenDisplayMode.Format = pPresentationParameters->BackBufferFormat;
 		fullScreenDisplayMode.Height = pPresentationParameters->BackBufferHeight;
 		fullScreenDisplayMode.Width = pPresentationParameters->BackBufferWidth;
 		fullScreenDisplayMode.RefreshRate = pPresentationParameters->FullScreen_RefreshRateInHz;
-		fullScreenDisplayMode.ScanLineOrdering = D3D9Base::D3DSCANLINEORDERING_PROGRESSIVE;
+		fullScreenDisplayMode.ScanLineOrdering = D3DSCANLINEORDERING_PROGRESSIVE;
 	}
-	D3D9Base::D3DDISPLAYMODEEX *pFullScreenDisplayMode = &fullScreenDisplayMode;
+	D3DDISPLAYMODEEX *pFullScreenDisplayMode = &fullScreenDisplayMode;
 	if (pPresentationParameters && pPresentationParameters->Windowed)
 		pFullScreenDisplayMode = 0;
 	return CreateDeviceEx(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, pFullScreenDisplayMode, ppReturnedDeviceInterface);
 }
 
-STDMETHODIMP_(UINT) D3D9Wrapper::IDirect3D9::GetAdapterModeCountEx(THIS_ UINT Adapter,CONST D3D9Base::D3DDISPLAYMODEFILTER* pFilter )
+STDMETHODIMP_(UINT) Hacker9::GetAdapterModeCountEx(THIS_ UINT Adapter,CONST D3DDISPLAYMODEFILTER* pFilter )
 {
-	LogInfo("IDirect3D9::GetAdapterModeCountEx called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::GetAdapterModeCountEx called: adapter #%d\n", Adapter);
 
 	return GetDirect3D9()->GetAdapterModeCountEx(Adapter, pFilter);
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::EnumAdapterModesEx(THIS_ UINT Adapter,CONST D3D9Base::D3DDISPLAYMODEFILTER* pFilter,UINT Mode,D3D9Base::D3DDISPLAYMODEEX* pMode)
+STDMETHODIMP Hacker9::EnumAdapterModesEx(THIS_ UINT Adapter,CONST D3DDISPLAYMODEFILTER* pFilter,UINT Mode,D3DDISPLAYMODEEX* pMode)
 {
-	LogInfo("IDirect3D9::EnumAdapterModesEx called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::EnumAdapterModesEx called: adapter #%d\n", Adapter);
 
 	return GetDirect3D9()->EnumAdapterModesEx(Adapter, pFilter, Mode, pMode);
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::GetAdapterDisplayModeEx(THIS_ UINT Adapter,D3D9Base::D3DDISPLAYMODEEX* pMode,D3D9Base::D3DDISPLAYROTATION* pRotation)
+STDMETHODIMP Hacker9::GetAdapterDisplayModeEx(THIS_ UINT Adapter,D3DDISPLAYMODEEX* pMode,D3DDISPLAYROTATION* pRotation)
 {
-	LogInfo("IDirect3D9::GetAdapterDisplayModeEx called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::GetAdapterDisplayModeEx called: adapter #%d\n", Adapter);
 
 	return GetDirect3D9()->GetAdapterDisplayModeEx(Adapter, pMode, pRotation);
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3D9::GetAdapterLUID(THIS_ UINT Adapter,LUID * pLUID)
+STDMETHODIMP Hacker9::GetAdapterLUID(THIS_ UINT Adapter,LUID * pLUID)
 {
-	LogInfo("IDirect3D9::GetAdapterLUID called: adapter #%d\n", Adapter);
+	LogInfo("Hacker9::GetAdapterLUID called: adapter #%d\n", Adapter);
 
 	return GetDirect3D9()->GetAdapterLUID(Adapter, pLUID);
 }

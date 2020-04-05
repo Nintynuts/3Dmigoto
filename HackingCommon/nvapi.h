@@ -12632,3 +12632,5 @@ NVAPI_INTERFACE NvAPI_SYS_GetPhysicalGpuFromDisplayId(NvU32 displayId, NvPhysica
 #pragma pack(pop)
 
 #endif // _NVAPI_H
+
+void NvAPIOverride();

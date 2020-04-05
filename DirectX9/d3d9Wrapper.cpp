@@ -1,23 +1,26 @@
-#include "Main.h"
+
+#include "d3d9Wrapper.h"
 #include <Shlobj.h>
 #include <ctime>
-#include "../log.h"
+#include "log.h"
+#include "version.h"
+#include "type_name.h"
 
-ThreadSafePointerSet D3D9Wrapper::IDirect3DSwapChain9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DDevice9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3D9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DSurface9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DVertexDeclaration9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DTexture9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DVertexBuffer9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DIndexBuffer9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DQuery9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DVertexShader9::m_List;
-ThreadSafePointerSet D3D9Wrapper::IDirect3DPixelShader9::m_List;
+ThreadSafePointerSet HackerSwapChain9::m_List;
+ThreadSafePointerSet HackerDevice9::m_List;
+ThreadSafePointerSet Hacker9::m_List;
+ThreadSafePointerSet HackerSurface9::m_List;
+ThreadSafePointerSet HackerVertexDeclaration9::m_List;
+ThreadSafePointerSet HackerTexture9::m_List;
+ThreadSafePointerSet HackerVertexBuffer9::m_List;
+ThreadSafePointerSet HackerIndexBuffer9::m_List;
+ThreadSafePointerSet HackerQuery9::m_List;
+ThreadSafePointerSet HackerVertexShader9::m_List;
+ThreadSafePointerSet HackerPixelShader9::m_List;
 
 static HMODULE hD3D;
 static FILE *LogFile = 0;
-static bool LogInput = false, LogDebug = false;
+static bool LogInput = false, gLogDebug = false;
 static bool gInitialized = false;
 static int SCREEN_WIDTH = -1;
 static int SCREEN_WIDTH_DELAY = -1;
@@ -35,15 +38,6 @@ struct SwapChainInfo
 };
 
 
-static char *LogTime()
-{
-	time_t ltime = time(0);
-	char *timeStr = asctime(localtime(&ltime));
-	timeStr[strlen(timeStr) - 1] = 0;
-	return timeStr;
-}
-
-
 void InitializeDLL()
 {
 	if (!gInitialized)
@@ -58,7 +52,7 @@ void InitializeDLL()
 		if (LogFile)
 			LogFile = fopen("d3d9_log.txt", "w");
 		LogInput = GetPrivateProfileInt(L"Logging", L"input", 0, dir);
-		LogDebug = GetPrivateProfileInt(L"Logging", L"debug", 0, dir);
+		gLogDebug = GetPrivateProfileInt(L"Logging", L"debug", 0, dir);
 
 		LogInfo("\nD3D9 DLL starting init  -  %s\n\n", LogTime());
 
@@ -110,7 +104,7 @@ int WINAPI D3DPERF_BeginEvent(DWORD col, LPCWSTR wszName)
 {
 	LogInfo("D3DPERF_BeginEvent called\n");
 
-	D3D9Wrapper::D3DPERF_BeginEvent call = (D3D9Wrapper::D3DPERF_BeginEvent)GetProcAddress(hD3D, "D3DPERF_BeginEvent");
+	Func::D3DPERF_BeginEvent call = (Func::D3DPERF_BeginEvent)GetProcAddress(hD3D, "D3DPERF_BeginEvent");
 	return (*call)(col, wszName);
 }
 
@@ -118,7 +112,7 @@ int WINAPI D3DPERF_EndEvent()
 {
 	LogInfo("D3DPERF_EndEvent called\n");
 
-	D3D9Wrapper::D3DPERF_EndEvent call = (D3D9Wrapper::D3DPERF_EndEvent)GetProcAddress(hD3D, "D3DPERF_EndEvent");
+	Func::D3DPERF_EndEvent call = (Func::D3DPERF_EndEvent)GetProcAddress(hD3D, "D3DPERF_EndEvent");
 	return (*call)();
 }
 
@@ -126,7 +120,7 @@ DWORD WINAPI D3DPERF_GetStatus()
 {
 	LogInfo("D3DPERF_GetStatus called\n");
 
-	D3D9Wrapper::D3DPERF_GetStatus call = (D3D9Wrapper::D3DPERF_GetStatus)GetProcAddress(hD3D, "D3DPERF_GetStatus");
+	Func::D3DPERF_GetStatus call = (Func::D3DPERF_GetStatus)GetProcAddress(hD3D, "D3DPERF_GetStatus");
 	return (*call)();
 }
 
@@ -134,15 +128,15 @@ BOOL WINAPI D3DPERF_QueryRepeatFrame()
 {
 	LogInfo("D3DPERF_QueryRepeatFrame called\n");
 
-	D3D9Wrapper::D3DPERF_QueryRepeatFrame call = (D3D9Wrapper::D3DPERF_QueryRepeatFrame)GetProcAddress(hD3D, "D3DPERF_QueryRepeatFrame");
+	Func::D3DPERF_QueryRepeatFrame call = (Func::D3DPERF_QueryRepeatFrame)GetProcAddress(hD3D, "D3DPERF_QueryRepeatFrame");
 	return (*call)();
 }
 
-void WINAPI D3DPERF_SetMarker(D3D9Base::D3DCOLOR color, LPCWSTR name)
+void WINAPI D3DPERF_SetMarker(D3DCOLOR color, LPCWSTR name)
 {
 	LogInfo("D3DPERF_SetMarker called\n");
 
-	D3D9Wrapper::D3DPERF_SetMarker call = (D3D9Wrapper::D3DPERF_SetMarker)GetProcAddress(hD3D, "D3DPERF_SetMarker");
+	Func::D3DPERF_SetMarker call = (Func::D3DPERF_SetMarker)GetProcAddress(hD3D, "D3DPERF_SetMarker");
 	(*call)(color, name);
 }
 
@@ -150,15 +144,15 @@ void WINAPI D3DPERF_SetOptions(DWORD options)
 {
 	LogInfo("D3DPERF_SetOptions called\n");
 
-	D3D9Wrapper::D3DPERF_SetOptions call = (D3D9Wrapper::D3DPERF_SetOptions)GetProcAddress(hD3D, "D3DPERF_SetOptions");
+	Func::D3DPERF_SetOptions call = (Func::D3DPERF_SetOptions)GetProcAddress(hD3D, "D3DPERF_SetOptions");
 	(*call)(options);
 }
 
-void WINAPI D3DPERF_SetRegion(D3D9Base::D3DCOLOR color, LPCWSTR name)
+void WINAPI D3DPERF_SetRegion(D3DCOLOR color, LPCWSTR name)
 {
 	LogInfo("D3DPERF_SetRegion called\n");
 
-	D3D9Wrapper::D3DPERF_SetRegion call = (D3D9Wrapper::D3DPERF_SetRegion)GetProcAddress(hD3D, "D3DPERF_SetRegion");
+	Func::D3DPERF_SetRegion call = (Func::D3DPERF_SetRegion)GetProcAddress(hD3D, "D3DPERF_SetRegion");
 	(*call)(color, name);
 }
 
@@ -166,7 +160,7 @@ void WINAPI DebugSetLevel(int a1, int a2)
 {
 	LogInfo("DebugSetLevel called\n");
 
-	D3D9Wrapper::DebugSetLevel call = (D3D9Wrapper::DebugSetLevel)GetProcAddress(hD3D, "DebugSetLevel");
+	Func::DebugSetLevel call = (Func::DebugSetLevel)GetProcAddress(hD3D, "DebugSetLevel");
 	(*call)(a1, a2);
 }
 
@@ -174,7 +168,7 @@ void WINAPI DebugSetMute(int a)
 {
 	LogInfo("DebugSetMute called\n");
 
-	D3D9Wrapper::DebugSetMute call = (D3D9Wrapper::DebugSetMute)GetProcAddress(hD3D, "DebugSetMute");
+	Func::DebugSetMute call = (Func::DebugSetMute)GetProcAddress(hD3D, "DebugSetMute");
 	(*call)(a);
 }
 
@@ -182,7 +176,7 @@ void *WINAPI Direct3DShaderValidatorCreate9()
 {
 	LogInfo("Direct3DShaderValidatorCreate9 called\n");
 
-	D3D9Wrapper::Direct3DShaderValidatorCreate9 call = (D3D9Wrapper::Direct3DShaderValidatorCreate9)GetProcAddress(hD3D, "Direct3DShaderValidatorCreate9");
+	Func::Direct3DShaderValidatorCreate9 call = (Func::Direct3DShaderValidatorCreate9)GetProcAddress(hD3D, "Direct3DShaderValidatorCreate9");
 	return (*call)();
 }
 
@@ -190,7 +184,7 @@ void WINAPI PSGPError(void *D3DFE_PROCESSVERTICES, int PSGPERRORID, unsigned int
 {
 	LogInfo("PSGPError called\n");
 
-	D3D9Wrapper::PSGPError call = (D3D9Wrapper::PSGPError)GetProcAddress(hD3D, "PSGPError");
+	Func::PSGPError call = (Func::PSGPError)GetProcAddress(hD3D, "PSGPError");
 	(*call)(D3DFE_PROCESSVERTICES, PSGPERRORID, a);
 }
 
@@ -198,13 +192,13 @@ void WINAPI PSGPSampleTexture(void *D3DFE_PROCESSVERTICES, unsigned int a, float
 {
 	LogInfo("PSGPSampleTexture called\n");
 
-	D3D9Wrapper::PSGPSampleTexture call = (D3D9Wrapper::PSGPSampleTexture)GetProcAddress(hD3D, "PSGPSampleTexture");
+	Func::PSGPSampleTexture call = (Func::PSGPSampleTexture)GetProcAddress(hD3D, "PSGPSampleTexture");
 	(*call)(D3DFE_PROCESSVERTICES, a, b, c, d);
 }
 
-STDMETHODIMP D3D9Wrapper::IDirect3DUnknown::QueryInterface(THIS_ REFIID riid, void** ppvObj)
+STDMETHODIMP IDirect3DUnknown::QueryInterface(THIS_ REFIID riid, void** ppvObj)
 {
-	LogDebug("D3D9Wrapper::IDirect3DUnknown::QueryInterface called at 'this': %s\n", type_name(this));
+	LogDebug("IDirect3DUnknown::QueryInterface called at 'this': %s\n", type_name(this));
 
 	IID m1 = { 0x017b2e72ul, 0xbcde, 0x9f15, { 0xa1, 0x2b, 0x3c, 0x4d, 0x5e, 0x6f, 0x70, 0x01 } };
 	IID m2 = { 0x017b2e72ul, 0xbcde, 0x9f15, { 0xa1, 0x2b, 0x3c, 0x4d, 0x5e, 0x6f, 0x70, 0x02 } };
@@ -215,14 +209,14 @@ STDMETHODIMP D3D9Wrapper::IDirect3DUnknown::QueryInterface(THIS_ REFIID riid, vo
 	{
 		LogInfo("Callback from dxgi.dll wrapper: requesting real ID3D9Device handle from %x\n", *ppvObj);
 	
-	    D3D9Wrapper::IDirect3DDevice9 *p = (D3D9Wrapper::IDirect3DDevice9*) D3D9Wrapper::IDirect3DDevice9::m_List.GetDataPtr(*ppvObj);
+	    HackerDevice9 *p = (HackerDevice9*) HackerDevice9::m_List.GetDataPtr(*ppvObj);
 		if (p)
 		{
 			LogInfo("  given pointer was already the real device.\n");
 		}
 		else
 		{
-			*ppvObj = ((D3D9Wrapper::IDirect3DDevice9 *)*ppvObj)->GetD3D9Device();
+			*ppvObj = ((HackerDevice9 *)*ppvObj)->GetD3D9Device();
 		}
 		LogInfo("  returning handle = %x\n", *ppvObj);
 	
@@ -240,7 +234,7 @@ STDMETHODIMP D3D9Wrapper::IDirect3DUnknown::QueryInterface(THIS_ REFIID riid, vo
 			{
 				// Present received.
 				// Todo: Not sure if this is actually used, but the 'this' here is going to be the wrong object and not work.
-				IDirect3DDevice9 *device = (IDirect3DDevice9 *)this;
+				HackerDevice9 *device = (HackerDevice9 *)this;
 				// RunFrameActions(device);
 				break;
 			}
@@ -265,93 +259,93 @@ STDMETHODIMP D3D9Wrapper::IDirect3DUnknown::QueryInterface(THIS_ REFIID riid, vo
 	HRESULT hr = m_pUnk->QueryInterface(riid, ppvObj);
 	if (hr == S_OK)
 	{
-		D3D9Wrapper::IDirect3DDevice9 *p1 = (D3D9Wrapper::IDirect3DDevice9*) D3D9Wrapper::IDirect3DDevice9::m_List.GetDataPtr(*ppvObj);
+		HackerDevice9 *p1 = (HackerDevice9*) HackerDevice9::m_List.GetDataPtr(*ppvObj);
 		if (p1)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p1;
 			unsigned long cnt2 = p1->AddRef();
-			LogInfo("  interface replaced with IDirect3DDevice9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p1->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerDevice9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p1->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DSwapChain9 *p2 = (D3D9Wrapper::IDirect3DSwapChain9*) D3D9Wrapper::IDirect3DSwapChain9::m_List.GetDataPtr(*ppvObj);
+		HackerSwapChain9 *p2 = (HackerSwapChain9*) HackerSwapChain9::m_List.GetDataPtr(*ppvObj);
 		if (p2)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p2;
 			unsigned long cnt2 = p2->AddRef();
-			LogInfo("  interface replaced with IDirect3DSwapChain9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p2->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerSwapChain9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p2->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3D9 *p3 = (D3D9Wrapper::IDirect3D9*) D3D9Wrapper::IDirect3D9::m_List.GetDataPtr(*ppvObj);
+		Hacker9 *p3 = (Hacker9*) Hacker9::m_List.GetDataPtr(*ppvObj);
 		if (p3)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p3;
 			unsigned long cnt2 = p3->AddRef();
-			LogInfo("  interface replaced with IDirect3D9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p3->m_ulRef, cnt2);
+			LogInfo("  interface replaced with Hacker9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p3->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DSurface9 *p4 = (D3D9Wrapper::IDirect3DSurface9*) D3D9Wrapper::IDirect3DSurface9::m_List.GetDataPtr(*ppvObj);
+		HackerSurface9 *p4 = (HackerSurface9*) HackerSurface9::m_List.GetDataPtr(*ppvObj);
 		if (p4)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p4;
 			unsigned long cnt2 = p4->AddRef();
-			LogInfo("  interface replaced with IDirect3DSurface9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p4->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerSurface9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p4->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DVertexDeclaration9 *p5 = (D3D9Wrapper::IDirect3DVertexDeclaration9*) D3D9Wrapper::IDirect3DVertexDeclaration9::m_List.GetDataPtr(*ppvObj);
+		HackerVertexDeclaration9 *p5 = (HackerVertexDeclaration9*) HackerVertexDeclaration9::m_List.GetDataPtr(*ppvObj);
 		if (p5)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p5;
 			unsigned long cnt2 = p5->AddRef();
-			LogInfo("  interface replaced with IDirect3DVertexDeclaration9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p5->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerVertexDeclaration9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p5->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DTexture9 *p6 = (D3D9Wrapper::IDirect3DTexture9*) D3D9Wrapper::IDirect3DTexture9::m_List.GetDataPtr(*ppvObj);
+		HackerTexture9 *p6 = (HackerTexture9*) HackerTexture9::m_List.GetDataPtr(*ppvObj);
 		if (p6)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p6;
 			unsigned long cnt2 = p6->AddRef();
-			LogInfo("  interface replaced with IDirect3DTexture9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p6->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerTexture9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p6->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DVertexBuffer9 *p7 = (D3D9Wrapper::IDirect3DVertexBuffer9*) D3D9Wrapper::IDirect3DVertexBuffer9::m_List.GetDataPtr(*ppvObj);
+		HackerVertexBuffer9 *p7 = (HackerVertexBuffer9*) HackerVertexBuffer9::m_List.GetDataPtr(*ppvObj);
 		if (p7)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p7;
 			unsigned long cnt2 = p7->AddRef();
-			LogInfo("  interface replaced with IDirect3DVertexBuffer9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p7->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerVertexBuffer9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p7->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DIndexBuffer9 *p8 = (D3D9Wrapper::IDirect3DIndexBuffer9*) D3D9Wrapper::IDirect3DIndexBuffer9::m_List.GetDataPtr(*ppvObj);
+		HackerIndexBuffer9 *p8 = (HackerIndexBuffer9*) HackerIndexBuffer9::m_List.GetDataPtr(*ppvObj);
 		if (p8)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p8;
 			unsigned long cnt2 = p8->AddRef();
-			LogInfo("  interface replaced with IDirect3DIndexBuffer9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p8->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerIndexBuffer9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p8->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DQuery9 *p9 = (D3D9Wrapper::IDirect3DQuery9*) D3D9Wrapper::IDirect3DQuery9::m_List.GetDataPtr(*ppvObj);
+		HackerQuery9 *p9 = (HackerQuery9*) HackerQuery9::m_List.GetDataPtr(*ppvObj);
 		if (p9)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p9;
 			unsigned long cnt2 = p9->AddRef();
-			LogInfo("  interface replaced with IDirect3DQuery9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p9->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerQuery9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p9->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DVertexShader9 *p10 = (D3D9Wrapper::IDirect3DVertexShader9*) D3D9Wrapper::IDirect3DVertexShader9::m_List.GetDataPtr(*ppvObj);
+		HackerVertexShader9 *p10 = (HackerVertexShader9*) HackerVertexShader9::m_List.GetDataPtr(*ppvObj);
 		if (p10)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p10;
 			unsigned long cnt2 = p10->AddRef();
-			LogInfo("  interface replaced with IDirect3DVertexShader9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p10->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerVertexShader9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p10->m_ulRef, cnt2);
 		}
-		D3D9Wrapper::IDirect3DPixelShader9 *p11 = (D3D9Wrapper::IDirect3DPixelShader9*) D3D9Wrapper::IDirect3DPixelShader9::m_List.GetDataPtr(*ppvObj);
+		HackerPixelShader9 *p11 = (HackerPixelShader9*) HackerPixelShader9::m_List.GetDataPtr(*ppvObj);
 		if (p11)
 		{
 			unsigned long cnt = ((IDirect3DUnknown*)*ppvObj)->Release();
 			*ppvObj = p11;
 			unsigned long cnt2 = p11->AddRef();
-			LogInfo("  interface replaced with IDirect3DPixelShader9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p11->m_ulRef, cnt2);
+			LogInfo("  interface replaced with HackerPixelShader9 wrapper. Interface counter=%d, wrapper counter=%d, wrapper internal counter = %d\n", cnt, p11->m_ulRef, cnt2);
 		}
 	}
 	LogInfo("  result = %x, handle = %x\n", hr, *ppvObj);
@@ -359,7 +353,7 @@ STDMETHODIMP D3D9Wrapper::IDirect3DUnknown::QueryInterface(THIS_ REFIID riid, vo
 	return hr;
 }
 
-D3D9Wrapper::IDirect3D9* WINAPI Direct3DCreate9(UINT Version)
+IDirect3D9* WINAPI Direct3DCreate9(UINT Version)
 {
 	InitializeDLL();
 	if (DLL_PATH[0])
@@ -409,14 +403,14 @@ D3D9Wrapper::IDirect3D9* WINAPI Direct3DCreate9(UINT Version)
     LogInfo("Direct3DCreate9 called with Version=%d\n", Version);
 
 
-	D3D9Wrapper::D3DCREATE pCreate = (D3D9Wrapper::D3DCREATE)GetProcAddress(hD3D, "Direct3DCreate9Ex");
+	Func::D3DCREATE pCreate = (Func::D3DCREATE)GetProcAddress(hD3D, "Direct3DCreate9Ex");
     if (!pCreate)
     {
         LogInfo("  could not find Direct3DCreate9Ex in d3d9.dll\n");
 	
         return NULL;
     }
-	D3D9Base::LPDIRECT3D9EX pD3D = NULL;
+	LPDIRECT3D9EX pD3D = NULL;
 	HRESULT hr = pCreate(Version, &pD3D);
     if (FAILED(hr) || pD3D == NULL)
     {
@@ -425,24 +419,24 @@ D3D9Wrapper::IDirect3D9* WINAPI Direct3DCreate9(UINT Version)
         return NULL;
     }
     
-    D3D9Wrapper::IDirect3D9 *wrapper = D3D9Wrapper::IDirect3D9::GetDirect3D(pD3D);
+    Hacker9 *wrapper = Hacker9::GetDirect3D(pD3D);
     LogInfo("  returns handle=%x, wrapper=%x\n", pD3D, wrapper);
 
-	return wrapper;
+	return (IDirect3D9*)wrapper;
 }
 
-HRESULT WINAPI Direct3DCreate9Ex(UINT Version, D3D9Wrapper::IDirect3D9 **ppD3D)
+HRESULT WINAPI Direct3DCreate9Ex(UINT Version, Hacker9 **ppD3D)
 {
 	if (ppD3D)
 	{
-		*ppD3D = Direct3DCreate9(Version);
+		*ppD3D = (Hacker9*)Direct3DCreate9(Version);
 		return S_OK;
 	}
 	return E_OUTOFMEMORY;
 }
 
-static D3D9Base::LPDIRECT3DSURFACE9 replaceSurface9(D3D9Wrapper::IDirect3DSurface9 *pSurface);
-static void CheckDevice(D3D9Wrapper::IDirect3DDevice9 *me)
+static LPDIRECT3DSURFACE9 replaceSurface9(HackerSurface9 *pSurface);
+static void CheckDevice(HackerDevice9 *me)
 {
 	if (!me->GetD3D9Device())
 	{
@@ -454,7 +448,7 @@ static void CheckDevice(D3D9Wrapper::IDirect3DDevice9 *me)
 			me->_BehaviorFlags, 
 			&me->_pPresentationParameters,
 			&me->_pFullscreenDisplayMode,
-			(D3D9Base::IDirect3DDevice9Ex**) &me->m_pUnk);
+			(IDirect3DDevice9Ex**) &me->m_pUnk);
 		if (FAILED(hr))
 		{
 			LogInfo("    failed creating device with result = %x\n", hr);
@@ -472,7 +466,7 @@ static void CheckDevice(D3D9Wrapper::IDirect3DDevice9 *me)
 				me->pendingCreateDepthStencilSurface->_MultiSample,
 				me->pendingCreateDepthStencilSurface->_MultisampleQuality,
 				me->pendingCreateDepthStencilSurface->_Discard,
-				(D3D9Base::IDirect3DSurface9**) &me->pendingCreateDepthStencilSurface->m_pUnk,
+				(IDirect3DSurface9**) &me->pendingCreateDepthStencilSurface->m_pUnk,
 				0);
 			if (FAILED(hr))
 			{
@@ -486,7 +480,7 @@ static void CheckDevice(D3D9Wrapper::IDirect3DDevice9 *me)
 		{
 			LogInfo("  calling postponed SetDepthStencilSurface.\n");
 		
-			D3D9Base::LPDIRECT3DSURFACE9 baseStencil = replaceSurface9(me->pendingSetDepthStencilSurface);
+			LPDIRECT3DSURFACE9 baseStencil = replaceSurface9(me->pendingSetDepthStencilSurface);
 			hr = me->GetD3D9Device()->SetDepthStencilSurface(baseStencil);
 			if (FAILED(hr))
 			{
@@ -499,7 +493,7 @@ static void CheckDevice(D3D9Wrapper::IDirect3DDevice9 *me)
 	}
 }
 
-static void CheckVertexDeclaration9(D3D9Wrapper::IDirect3DVertexDeclaration9 *me)
+static void CheckVertexDeclaration9(HackerVertexDeclaration9 *me)
 {
 	if (!me->pendingCreateVertexDeclaration)
 		return;
@@ -507,7 +501,7 @@ static void CheckVertexDeclaration9(D3D9Wrapper::IDirect3DVertexDeclaration9 *me
 	CheckDevice(me->pendingDevice);
 
 	LogInfo("  calling postponed CreateVertexDeclaration.\n");
-	HRESULT hr = me->pendingDevice->GetD3D9Device()->CreateVertexDeclaration(&me->_VertexElements, (D3D9Base::IDirect3DVertexDeclaration9**) &me->m_pUnk);
+	HRESULT hr = me->pendingDevice->GetD3D9Device()->CreateVertexDeclaration(&me->_VertexElements, (IDirect3DVertexDeclaration9**) &me->m_pUnk);
 	if (FAILED(hr))
 	{
 		LogInfo("    failed creating vertex declaration with result = %x\n", hr);
@@ -516,14 +510,14 @@ static void CheckVertexDeclaration9(D3D9Wrapper::IDirect3DVertexDeclaration9 *me
 	}
 }
 
-static void CheckTexture9(D3D9Wrapper::IDirect3DTexture9 *me)
+static void CheckTexture9(HackerTexture9 *me)
 {
 	if (me->pendingCreateTexture)
 	{
 		me->pendingCreateTexture = false;
 		CheckDevice(me->_Device);	
 		LogInfo("  calling postponed CreateTexture.\n");
-		HRESULT hr = me->_Device->GetD3D9Device()->CreateTexture(me->_Width, me->_Height, me->_Levels, me->_Usage, me->_Format, me->_Pool, (D3D9Base::IDirect3DTexture9**) &me->m_pUnk, 0);
+		HRESULT hr = me->_Device->GetD3D9Device()->CreateTexture(me->_Width, me->_Height, me->_Levels, me->_Usage, me->_Format, me->_Pool, (IDirect3DTexture9**) &me->m_pUnk, 0);
 		if (FAILED(hr))
 		{
 			LogInfo("    failed creating texture with result = %x\n", hr);
@@ -536,7 +530,7 @@ static void CheckTexture9(D3D9Wrapper::IDirect3DTexture9 *me)
 		me->pendingLockUnlock = false;
 		LogInfo("  calling postponed Lock.\n");
 
-		D3D9Base::D3DLOCKED_RECT rect;
+		D3DLOCKED_RECT rect;
 		HRESULT hr = me->LockRect(me->_Level, &rect, 0, me->_Flags);
 		if (FAILED(hr))
 		{
@@ -558,7 +552,7 @@ static void CheckTexture9(D3D9Wrapper::IDirect3DTexture9 *me)
 
 }
 
-static void CheckSurface9(D3D9Wrapper::IDirect3DSurface9 *me)
+static void CheckSurface9(HackerSurface9 *me)
 {
 	if (!me->pendingGetSurfaceLevel)
 		return;
@@ -566,7 +560,7 @@ static void CheckSurface9(D3D9Wrapper::IDirect3DSurface9 *me)
 	CheckTexture9(me->_Texture);
 
 	LogInfo("  calling postponed GetSurfaceLevel.\n");
-	HRESULT hr = me->_Texture->GetD3DTexture9()->GetSurfaceLevel(me->_Level, (D3D9Base::IDirect3DSurface9**) &me->m_pUnk);
+	HRESULT hr = me->_Texture->GetD3DTexture9()->GetSurfaceLevel(me->_Level, (IDirect3DSurface9**) &me->m_pUnk);
 	if (FAILED(hr))
 	{
 		LogInfo("    failed getting surface with result = %x\n", hr);
@@ -575,14 +569,14 @@ static void CheckSurface9(D3D9Wrapper::IDirect3DSurface9 *me)
 	}
 }
 
-static void CheckVertexBuffer9(D3D9Wrapper::IDirect3DVertexBuffer9 *me)
+static void CheckVertexBuffer9(HackerVertexBuffer9 *me)
 {
 	if (me->pendingCreateVertexBuffer)
 	{
 		me->pendingCreateVertexBuffer = false;
 		CheckDevice(me->_Device);
 		LogInfo("  calling postponed CreateVertexBuffer.\n");
-		HRESULT hr = me->_Device->GetD3D9Device()->CreateVertexBuffer(me->_Length, me->_Usage, me->_FVF, me->_Pool, (D3D9Base::IDirect3DVertexBuffer9**) &me->m_pUnk, 0);
+		HRESULT hr = me->_Device->GetD3D9Device()->CreateVertexBuffer(me->_Length, me->_Usage, me->_FVF, me->_Pool, (IDirect3DVertexBuffer9**) &me->m_pUnk, 0);
 		if (FAILED(hr))
 		{
 			LogInfo("    failed creating vertex buffer with result = %x\n", hr);
@@ -614,14 +608,14 @@ static void CheckVertexBuffer9(D3D9Wrapper::IDirect3DVertexBuffer9 *me)
 	}
 }
 
-static void CheckIndexBuffer9(D3D9Wrapper::IDirect3DIndexBuffer9 *me)
+static void CheckIndexBuffer9(HackerIndexBuffer9 *me)
 {
 	if (me->pendingCreateIndexBuffer)
 	{
 		me->pendingCreateIndexBuffer = false;
 		CheckDevice(me->_Device);
 		LogInfo("  calling postponed CreateIndexBuffer.\n");
-		HRESULT hr = me->_Device->GetD3D9Device()->CreateIndexBuffer(me->_Length, me->_Usage, me->_Format, me->_Pool, (D3D9Base::IDirect3DIndexBuffer9**) &me->m_pUnk, 0);
+		HRESULT hr = me->_Device->GetD3D9Device()->CreateIndexBuffer(me->_Length, me->_Usage, me->_Format, me->_Pool, (IDirect3DIndexBuffer9**) &me->m_pUnk, 0);
 		if (FAILED(hr))
 		{
 			LogInfo("    failed creating index buffer with result = %x\n", hr);
@@ -653,10 +647,10 @@ static void CheckIndexBuffer9(D3D9Wrapper::IDirect3DIndexBuffer9 *me)
 	}
 }
 
-static D3D9Base::LPDIRECT3DSURFACE9 replaceSurface9(D3D9Wrapper::IDirect3DSurface9 *pSurface)
+static LPDIRECT3DSURFACE9 replaceSurface9(HackerSurface9 *pSurface)
 {
 	if (!pSurface) return 0;
-    D3D9Wrapper::IDirect3DSurface9 *p = (D3D9Wrapper::IDirect3DSurface9*) D3D9Wrapper::IDirect3DSurface9::m_List.GetDataPtr(pSurface);
+    HackerSurface9 *p = (HackerSurface9*) HackerSurface9::m_List.GetDataPtr(pSurface);
 	if (!p && pSurface->magic == 0x7da43feb)
 	{
 		CheckSurface9(pSurface);
@@ -664,13 +658,13 @@ static D3D9Base::LPDIRECT3DSURFACE9 replaceSurface9(D3D9Wrapper::IDirect3DSurfac
 		return pSurface->GetD3DSurface9();
 	}
 	LogDebug("    warning: original Direct3DSurface9 %x used\n", pSurface);
-	return (D3D9Base::LPDIRECT3DSURFACE9) pSurface;
+	return (LPDIRECT3DSURFACE9) pSurface;
 }
 
-static D3D9Base::LPDIRECT3DVERTEXDECLARATION9 replaceVertexDeclaration9(D3D9Wrapper::IDirect3DVertexDeclaration9 *pVertexDeclaration)
+static LPDIRECT3DVERTEXDECLARATION9 replaceVertexDeclaration9(HackerVertexDeclaration9 *pVertexDeclaration)
 {
 	if (!pVertexDeclaration) return 0;
-    D3D9Wrapper::IDirect3DVertexDeclaration9 *p = (D3D9Wrapper::IDirect3DVertexDeclaration9*) D3D9Wrapper::IDirect3DVertexDeclaration9::m_List.GetDataPtr(pVertexDeclaration);
+    HackerVertexDeclaration9 *p = (HackerVertexDeclaration9*) HackerVertexDeclaration9::m_List.GetDataPtr(pVertexDeclaration);
 	if (!p && pVertexDeclaration->magic == 0x7da43feb)
 	{
 		CheckVertexDeclaration9(pVertexDeclaration);
@@ -678,13 +672,13 @@ static D3D9Base::LPDIRECT3DVERTEXDECLARATION9 replaceVertexDeclaration9(D3D9Wrap
 		return pVertexDeclaration->GetD3DVertexDeclaration9();
 	}
 	LogDebug("    warning: original Direct3DVertexDeclaration9 %x used\n", pVertexDeclaration);
-	return (D3D9Base::LPDIRECT3DVERTEXDECLARATION9) pVertexDeclaration;
+	return (LPDIRECT3DVERTEXDECLARATION9) pVertexDeclaration;
 }
 
-static D3D9Base::LPDIRECT3DVERTEXBUFFER9 replaceVertexBuffer9(D3D9Wrapper::IDirect3DVertexBuffer9 *pVertexBuffer)
+static LPDIRECT3DVERTEXBUFFER9 replaceVertexBuffer9(HackerVertexBuffer9 *pVertexBuffer)
 {
 	if (!pVertexBuffer) return 0;
-    D3D9Wrapper::IDirect3DVertexBuffer9 *p = (D3D9Wrapper::IDirect3DVertexBuffer9*) D3D9Wrapper::IDirect3DVertexBuffer9::m_List.GetDataPtr(pVertexBuffer);
+    HackerVertexBuffer9 *p = (HackerVertexBuffer9*) HackerVertexBuffer9::m_List.GetDataPtr(pVertexBuffer);
 	if (!p && pVertexBuffer->magic == 0x7da43feb)
 	{
 		CheckVertexBuffer9(pVertexBuffer);
@@ -692,13 +686,13 @@ static D3D9Base::LPDIRECT3DVERTEXBUFFER9 replaceVertexBuffer9(D3D9Wrapper::IDire
 		return pVertexBuffer->GetD3DVertexBuffer9();
 	}
 	LogDebug("    warning: original Direct3DVertexBuffer9 %x used\n", pVertexBuffer);
-	return (D3D9Base::LPDIRECT3DVERTEXBUFFER9) pVertexBuffer;
+	return (LPDIRECT3DVERTEXBUFFER9) pVertexBuffer;
 }
 
-static D3D9Base::LPDIRECT3DINDEXBUFFER9 replaceIndexBuffer9(D3D9Wrapper::IDirect3DIndexBuffer9 *pIndexBuffer)
+static LPDIRECT3DINDEXBUFFER9 replaceIndexBuffer9(HackerIndexBuffer9 *pIndexBuffer)
 {
 	if (!pIndexBuffer) return 0;
-    D3D9Wrapper::IDirect3DIndexBuffer9 *p = (D3D9Wrapper::IDirect3DIndexBuffer9*) D3D9Wrapper::IDirect3DIndexBuffer9::m_List.GetDataPtr(pIndexBuffer);
+    HackerIndexBuffer9 *p = (HackerIndexBuffer9*) HackerIndexBuffer9::m_List.GetDataPtr(pIndexBuffer);
 	if (!p && pIndexBuffer->magic == 0x7da43feb)
 	{
 		CheckIndexBuffer9(pIndexBuffer);
@@ -706,13 +700,13 @@ static D3D9Base::LPDIRECT3DINDEXBUFFER9 replaceIndexBuffer9(D3D9Wrapper::IDirect
 		return pIndexBuffer->GetD3DIndexBuffer9();
 	}
 	LogDebug("    warning: original Direct3DIndexBuffer9 %x used\n", pIndexBuffer);
-	return (D3D9Base::LPDIRECT3DINDEXBUFFER9) pIndexBuffer;
+	return (LPDIRECT3DINDEXBUFFER9) pIndexBuffer;
 }
 
-static D3D9Base::LPDIRECT3DTEXTURE9 replaceTexture9(D3D9Wrapper::IDirect3DTexture9 *pTexture)
+static LPDIRECT3DTEXTURE9 replaceTexture9(HackerTexture9 *pTexture)
 {
 	if (!pTexture) return 0;
-    D3D9Wrapper::IDirect3DTexture9 *p = (D3D9Wrapper::IDirect3DTexture9*) D3D9Wrapper::IDirect3DTexture9::m_List.GetDataPtr(pTexture);
+    HackerTexture9 *p = (HackerTexture9*) HackerTexture9::m_List.GetDataPtr(pTexture);
 	if (!p && pTexture->magic == 0x7da43feb)
 	{
 		CheckTexture9(pTexture);
@@ -720,33 +714,33 @@ static D3D9Base::LPDIRECT3DTEXTURE9 replaceTexture9(D3D9Wrapper::IDirect3DTextur
 		return pTexture->GetD3DTexture9();
 	}
 	LogDebug("    warning: original Direct3DTexture9 %x used\n", pTexture);
-	return (D3D9Base::LPDIRECT3DTEXTURE9) pTexture;
+	return (LPDIRECT3DTEXTURE9) pTexture;
 }
 
-static D3D9Base::LPDIRECT3DVERTEXSHADER9 replaceVertexShader9(D3D9Wrapper::IDirect3DVertexShader9 *pVertexShader)
+static LPDIRECT3DVERTEXSHADER9 replaceVertexShader9(HackerVertexShader9 *pVertexShader)
 {
 	if (!pVertexShader) return 0;
-    D3D9Wrapper::IDirect3DVertexShader9 *p = (D3D9Wrapper::IDirect3DVertexShader9*) D3D9Wrapper::IDirect3DVertexShader9::m_List.GetDataPtr(pVertexShader);
+    HackerVertexShader9 *p = (HackerVertexShader9*) HackerVertexShader9::m_List.GetDataPtr(pVertexShader);
 	if (!p && pVertexShader->magic == 0x7da43feb)
 	{
 		LogDebug("    using Direct3DVertexShader9 %x from wrapper %x\n", pVertexShader->GetD3DVertexShader9(), pVertexShader);
 		return pVertexShader->GetD3DVertexShader9();
 	}
 	LogDebug("    warning: original Direct3DVertexShader9 %x used\n", pVertexShader);
-	return (D3D9Base::LPDIRECT3DVERTEXSHADER9) pVertexShader;
+	return (LPDIRECT3DVERTEXSHADER9) pVertexShader;
 }
 
-static D3D9Base::LPDIRECT3DPIXELSHADER9 replacePixelShader9(D3D9Wrapper::IDirect3DPixelShader9 *pPixelShader)
+static LPDIRECT3DPIXELSHADER9 replacePixelShader9(HackerPixelShader9 *pPixelShader)
 {
 	if (!pPixelShader) return 0;
-    D3D9Wrapper::IDirect3DPixelShader9 *p = (D3D9Wrapper::IDirect3DPixelShader9*) D3D9Wrapper::IDirect3DPixelShader9::m_List.GetDataPtr(pPixelShader);
+    HackerPixelShader9 *p = (HackerPixelShader9*) HackerPixelShader9::m_List.GetDataPtr(pPixelShader);
 	if (!p && pPixelShader->magic == 0x7da43feb)
 	{
 		LogDebug("    using Direct3DPixelShader9 %x from wrapper %x\n", pPixelShader->GetD3DPixelShader9(), pPixelShader);
 		return pPixelShader->GetD3DPixelShader9();
 	}
 	LogDebug("    warning: original Direct3DPixelShader9 %x used\n", pPixelShader);
-	return (D3D9Base::LPDIRECT3DPIXELSHADER9) pPixelShader;
+	return (LPDIRECT3DPIXELSHADER9) pPixelShader;
 }
 
 #include "Direct3D9Functions.h"

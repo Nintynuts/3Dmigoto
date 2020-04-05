@@ -8,18 +8,15 @@
 
 #include "SimpleMath.h"
 #include "SpriteBatch.h"
-
-#include "log.h"
-#include "version.h"
-#include "D3D11Wrapper.h"
-//#include "nvapi.h"
-#include "Globals.h"
 #include "profiling.h"
 
-#include "HackerDevice.h"
-#include "HackerContext.h"
+#include <log.h>
+#include <util.h>
+#include <version.h>
+#include <nvapi.h>
 
 #include <stdexcept>
+#include <vector>
 
 #define MAX_SIMULTANEOUS_NOTICES 10
 
@@ -573,18 +570,18 @@ static void CreateShaderCountString(wchar_t *counts)
 	// shaderhacking. VS and PS are the absolute most important, CS is
 	// pretty important, GS and DS show up from time to time and HS is not
 	// important at all since we have never needed to fix one.
-	AppendShaderText(counts, L"VS", G->mSelectedVertexShaderPos, G->mVisitedVertexShaders.size());
-	AppendShaderText(counts, L"PS", G->mSelectedPixelShaderPos, G->mVisitedPixelShaders.size());
-	AppendShaderText(counts, L"CS", G->mSelectedComputeShaderPos, G->mVisitedComputeShaders.size());
-	AppendShaderText(counts, L"GS", G->mSelectedGeometryShaderPos, G->mVisitedGeometryShaders.size());
-	AppendShaderText(counts, L"DS", G->mSelectedDomainShaderPos, G->mVisitedDomainShaders.size());
-	AppendShaderText(counts, L"HS", G->mSelectedHullShaderPos, G->mVisitedHullShaders.size());
-	if (G->mSelectedVertexBuffer != -1)
-		AppendShaderText(counts, L"VB", G->mSelectedVertexBufferPos, G->mVisitedVertexBuffers.size());
-	if (G->mSelectedIndexBuffer != -1)
-		AppendShaderText(counts, L"IB", G->mSelectedIndexBufferPos, G->mVisitedIndexBuffers.size());
-	if (G->mSelectedRenderTarget != (ID3D11Resource *)-1)
-		AppendShaderText(counts, L"RT", G->mSelectedRenderTargetPos, G->mVisitedRenderTargets.size());
+	AppendShaderText(counts, L"VS", G->mVertexShaders.mSelectedPos, G->mVertexShaders.mVisited.size());
+	AppendShaderText(counts, L"PS", G->mPixelShaders.mSelectedPos, G->mPixelShaders.mVisited.size());
+	AppendShaderText(counts, L"CS", G->mComputeShaders.mSelectedPos, G->mComputeShaders.mVisited.size());
+	AppendShaderText(counts, L"GS", G->mGeometryShaders.mSelectedPos, G->mGeometryShaders.mVisited.size());
+	AppendShaderText(counts, L"DS", G->mDomainShaders.mSelectedPos, G->mDomainShaders.mVisited.size());
+	AppendShaderText(counts, L"HS", G->mHullShaders.mSelectedPos, G->mHullShaders.mVisited.size());
+	if (G->mVertexBuffers.mSelected != -1)
+		AppendShaderText(counts, L"VB", G->mVertexBuffers.mSelectedPos, G->mVertexBuffers.mVisited.size());
+	if (G->mIndexBuffers.mSelected != -1)
+		AppendShaderText(counts, L"IB", G->mIndexBuffers.mSelectedPos, G->mIndexBuffers.mVisited.size());
+	if (G->mRenderTargets.mSelected != (ID3D11Resource *)-1)
+		AppendShaderText(counts, L"RT", G->mRenderTargets.mSelectedPos, G->mRenderTargets.mVisited.size());
 
 	marking_mode = lookup_enum_name(MarkingModeNames, G->marking_mode);
 	if (marking_mode)
@@ -592,7 +589,7 @@ static void CreateShaderCountString(wchar_t *counts)
 }
 
 
-// Need to convert from the current selection, mSelectedVertexShader as hash, and
+// Need to convert from the current selection, mVertexShaders.mSelected as hash, and
 // find the OriginalShaderInfo that matches.  This is a linear search instead of a
 // hash lookup, because we don't have the ID3D11DeviceChild*.
 
@@ -673,17 +670,17 @@ void Overlay::DrawShaderInfoLines(float *y)
 	// purposes). Since these only show up while hunting, it is better to
 	// have them reflect the actual order that they are run in. The summary
 	// line can stay in order of importance since it is always shown.
-	DrawShaderInfoLine("VB", G->mSelectedVertexBuffer, y, false);
-	DrawShaderInfoLine("IB", G->mSelectedIndexBuffer, y, false);
-	DrawShaderInfoLine("VS", G->mSelectedVertexShader, y, true);
-	DrawShaderInfoLine("HS", G->mSelectedHullShader, y, true);
-	DrawShaderInfoLine("DS", G->mSelectedDomainShader, y, true);
-	DrawShaderInfoLine("GS", G->mSelectedGeometryShader, y, true);
-	DrawShaderInfoLine("PS", G->mSelectedPixelShader, y, true);
-	DrawShaderInfoLine("CS", G->mSelectedComputeShader, y, true);
+	DrawShaderInfoLine("VB", G->mVertexBuffers.mSelected, y, false);
+	DrawShaderInfoLine("IB", G->mIndexBuffers.mSelected, y, false);
+	DrawShaderInfoLine("VS", G->mVertexShaders.mSelected, y, true);
+	DrawShaderInfoLine("HS", G->mHullShaders.mSelected, y, true);
+	DrawShaderInfoLine("DS", G->mDomainShaders.mSelected, y, true);
+	DrawShaderInfoLine("GS", G->mGeometryShaders.mSelected, y, true);
+	DrawShaderInfoLine("PS", G->mPixelShaders.mSelected, y, true);
+	DrawShaderInfoLine("CS", G->mComputeShaders.mSelected, y, true);
 	// FIXME? This one is stored as a handle, not a hash:
-	if (G->mSelectedRenderTarget != (ID3D11Resource *)-1)
-		DrawShaderInfoLine("RT", GetOrigResourceHash(G->mSelectedRenderTarget), y, false);
+	if (G->mRenderTargets.mSelected != (ID3D11Resource *)-1)
+		DrawShaderInfoLine("RT", GetOrigResourceHash(G->mRenderTargets.mSelected), y, false);
 }
 
 void Overlay::DrawNotices(float *y)

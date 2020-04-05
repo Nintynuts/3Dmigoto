@@ -64,6 +64,7 @@
 
 #include "log.h"
 #include "util.h"
+#include "type_name_dx11.h"
 #include "globals.h"
 #include "Hunting.h"
 #include "Override.h"

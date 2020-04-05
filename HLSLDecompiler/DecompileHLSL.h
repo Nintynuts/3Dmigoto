@@ -17,7 +17,7 @@ struct DecompilerSettings
 	int StereoParamsReg;
 	int IniParamsReg;
 
-	bool fixSvPosition;
+	bool fixSvPosition, fixLightPosition;
 	bool recompileVs;
 	char ZRepair_DepthTextureReg1, ZRepair_DepthTextureReg2;
 	std::string ZRepair_DepthTexture1, ZRepair_DepthTexture2;
