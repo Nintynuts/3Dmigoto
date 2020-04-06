@@ -4,12 +4,13 @@
 #include <stdint.h>
 #include <tuple>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <vector>
 #include <memory>
 #include <atomic>
 
-#include "util.h"
+#include <enum.h>
 #include "DrawCallInfo.h"
 
 // Tracks info about specific resource instances:

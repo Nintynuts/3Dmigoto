@@ -10,7 +10,8 @@
 #include <pcre2.h>
 #include <codecvt>
 
-#include "log.h"
+#include <log.h>
+#include <texture.h>
 #include "Globals.h"
 #include "Override.h"
 #include "Hunting.h"

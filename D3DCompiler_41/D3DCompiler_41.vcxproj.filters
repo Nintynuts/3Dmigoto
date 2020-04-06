@@ -4,7 +4,6 @@
     <None Include="D3DCompiler_41.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Main.h" />
     <ClInclude Include="..\D3DCompiler\d3dcWrapper.h" />
   </ItemGroup>
   <ItemGroup>

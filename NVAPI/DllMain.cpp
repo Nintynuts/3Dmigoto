@@ -3,9 +3,9 @@
 #include <dxgi1_2.h>
 #include <d3d11_1.h>
 
-#include "../nvapi.h"
-#include "../util.h"
-#include "../log.h"
+#include <nvapi.h>
+#include <version.h>
+#include <log.h>
 
 using namespace std;
 
@@ -160,8 +160,8 @@ static bool LogConvergence = false;
 static bool LogSeparation = false;
 static bool LogCalls = false;
 
-bool gLogDebug = false;
 FILE *LogFile = 0;
+bool gLogDebug = false;
 
 
 #define LogCall(fmt, ...) \

@@ -1,10 +1,12 @@
 #include <d3d11_1.h>
 #include <D3D11ShaderTracing.h>
+#include <d3dcompiler.h>
 #include <Shlobj.h>
 #include <algorithm>
 #include <ctime>
 
-#include "util.h"
+#include <util.h>
+#include <log.h>
 
 #define COMPILER_DLL_VERSION "46"
 #define COMPILER_DLL_VERSIONL L"46"

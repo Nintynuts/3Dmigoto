@@ -515,8 +515,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -533,8 +533,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -568,37 +568,31 @@
     <OutDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DirectXTK</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdkDir_80)Include\um;$(WindowsSdkDir_80)Include\shared;$(WindowsSdkDir_80)Include\winrt</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DirectXTK</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdkDir_80)Include\um;$(WindowsSdkDir_80)Include\shared;$(WindowsSdkDir_80)Include\winrt</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|Win32'">
     <OutDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DirectXTK</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdkDir_80)Include\um;$(WindowsSdkDir_80)Include\shared;$(WindowsSdkDir_80)Include\winrt</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DirectXTK</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdkDir_80)Include\um;$(WindowsSdkDir_80)Include\shared;$(WindowsSdkDir_80)Include\winrt</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DirectXTK</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdkDir_80)Include\um;$(WindowsSdkDir_80)Include\shared;$(WindowsSdkDir_80)Include\winrt</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Zip Release|x64'">
     <OutDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Bin\Desktop_2013\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DirectXTK</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdkDir_80)Include\um;$(WindowsSdkDir_80)Include\shared;$(WindowsSdkDir_80)Include\winrt</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -653,7 +647,6 @@
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <ExceptionHandling>Async</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -700,7 +693,6 @@
       <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <ExceptionHandling>Async</ExceptionHandling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

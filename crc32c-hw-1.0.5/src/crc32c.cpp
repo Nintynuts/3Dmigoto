@@ -26,6 +26,7 @@
 
 #define NOMINMAX
 #include <windows.h>
+#include <intrin.h>
 
 #include <nmmintrin.h>
 #include <stdio.h>

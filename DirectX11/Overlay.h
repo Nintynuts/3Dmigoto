@@ -29,6 +29,7 @@ namespace DirectX
 
 #include "HackerDevice.h"
 #include "HackerContext.h"
+#include "util.h"
 
 class HackerSwapChain;
 

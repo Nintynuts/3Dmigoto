@@ -16,8 +16,10 @@
 #include "profiling.h"
 #include "Hunting.h"
 #include "cursor.h"
+#include "Overlay.h"
 
 #include <D3DCompiler.h>
+#include <texture.h>
 
 CustomResources customResources;
 CustomShaders customShaders;
@@ -2496,22 +2498,22 @@ float CommandListOperand::process_shader_filter(CommandListState *state)
 
 	switch (shader_filter_target) {
 		case L'v':
-			shader = mHackerContext->mCurrentVertexShaderHandle;
+			shader = G->mVertexShaders.mCurrentHandle;
 			break;
 		case L'h':
-			shader = mHackerContext->mCurrentHullShaderHandle;
+			shader = G->mHullShaders.mCurrentHandle;
 			break;
 		case L'd':
-			shader = mHackerContext->mCurrentDomainShaderHandle;
+			shader = G->mDomainShaders.mCurrentHandle;
 			break;
 		case L'g':
-			shader = mHackerContext->mCurrentGeometryShaderHandle;
+			shader = G->mGeometryShaders.mCurrentHandle;
 			break;
 		case L'p':
-			shader = mHackerContext->mCurrentPixelShaderHandle;
+			shader = G->mPixelShaders.mCurrentHandle;
 			break;
 		case L'c':
-			shader = mHackerContext->mCurrentComputeShaderHandle;
+			shader = G->mComputeShaders.mCurrentHandle;
 			break;
 		default:
 			LogOverlay(LOG_DIRE, "BUG: Unknown shader filter type: \"%C\"\n", shader_filter_target);
