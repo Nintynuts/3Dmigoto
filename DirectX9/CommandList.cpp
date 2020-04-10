@@ -1,9 +1,14 @@
 #include "CommandList.h"
 #include "IniHandler.h"
+#include "Override.h"
+#include "om_state.h"
+
+#include <hash.h>
+
+#include <D3DCompiler.h>
 #include <algorithm>
 #include <sstream>
-#include "Override.h"
-#include <D3DCompiler.h>
+
 #define getA(c) (((c)&0xff000000)>>24)
 #define getR(c) (((c)&0x00ff0000)>>16)
 #define getG(c) (((c)&0x0000ff00)>>8)

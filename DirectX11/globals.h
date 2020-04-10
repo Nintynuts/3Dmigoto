@@ -11,7 +11,6 @@
 
 #include "DLLMainHook.h"
 #include "DirectXMath.h"
-#include "util.h"
 #include "DecompileHLSL.h"
 
 #include "ResourceHash.h"
@@ -19,19 +18,14 @@
 #include "profiling.h"
 #include "lock.h"
 
+#include <globals_common.h>
+
 extern HINSTANCE migoto_handle;
 
 // Resolve circular include dependency between Globals.h ->
 // CommandList.h -> HackerContext.h -> Globals.h
 class CommandListCommand;
 class CommandList;
-
-
-enum HuntingMode {
-	HUNTING_MODE_DISABLED = 0,
-	HUNTING_MODE_ENABLED = 1,
-	HUNTING_MODE_SOFT_DISABLED = 2,
-};
 
 enum class MarkingMode {
 	SKIP,
@@ -395,7 +389,7 @@ enum class AsyncQueryType
 	COUNTER,
 };
 
-struct Globals
+struct Globals : public GlobalsBase
 {
 	bool gInitialized;
 	bool gReloadConfigPending;
@@ -404,8 +398,6 @@ struct Globals
 	bool dump_all_profiles;
 	DWORD ticks_at_launch;
 
-	wchar_t SHADER_PATH[MAX_PATH];
-	wchar_t SHADER_CACHE_PATH[MAX_PATH];
 	wchar_t CHAIN_DLL_PATH[MAX_PATH];
 	int load_library_redirect;
 
@@ -441,7 +433,6 @@ struct Globals
 	int gSurfaceSquareCreateMode;
 	bool gForceNoNvAPI;
 
-	UINT hunting;
 	bool fix_enabled;
 	bool config_reloadable;
 	bool show_original_enabled;
@@ -461,12 +452,11 @@ struct Globals
 	ShaderHashType shader_hash_type;
 	int texture_hash_version;
 	int EXPORT_HLSL;		// 0=off, 1=HLSL only, 2=HLSL+OriginalASM, 3= HLSL+OriginalASM+recompiledASM
-	bool EXPORT_SHADERS, EXPORT_FIXED, EXPORT_BINARY, CACHE_SHADERS, SCISSOR_DISABLE;
+	bool EXPORT_SHADERS, EXPORT_FIXED, EXPORT_BINARY, SCISSOR_DISABLE;
 	int track_texture_updates;
 	bool assemble_signature_comments;
 	bool disassemble_undecipherable_custom_data;
 	bool patch_cb_offsets;
-	int recursive_include;
 	uint32_t ZBufferHashToInject;
 	DecompilerSettings decompiler_settings;
 	bool DumpUsage;
@@ -492,7 +482,6 @@ struct Globals
 	CommandList constants_command_list;
 	CommandList post_constants_command_list;
 	bool constants_run;
-	unsigned frame_no;
 	HWND hWnd; // To translate mouse coordinates to the window
 	bool hide_cursor;
 	bool cursor_upscaling_bypass;
@@ -602,7 +591,7 @@ struct Globals
 	std::map<UINT64, ShaderInfoData> mComputeShaderInfo;		// std::map so that ShaderUsage.txt is sorted - lookup time is O(log N)
 
 	Globals() :
-
+		GlobalsBase(),
 		mSelectedRenderTargetSnapshot(0),
 		mSelectedRenderTargetPos(-1),
 		mSelectedRenderTarget((ID3D11Resource *)-1),
@@ -624,7 +613,6 @@ struct Globals
 		mSelectedHullShaderPos(-1),
 		mPinkingShader(0),
 
-		hunting(HUNTING_MODE_DISABLED),
 		fix_enabled(true),
 		config_reloadable(false),
 		show_original_enabled(false),
@@ -646,7 +634,6 @@ struct Globals
 		EXPORT_HLSL(0),
 		EXPORT_FIXED(false),
 		EXPORT_BINARY(false),
-		CACHE_SHADERS(false),
 		DumpUsage(false),
 		ENABLE_TUNE(false),
 		gTuneStep(0.001f),
@@ -654,7 +641,6 @@ struct Globals
 		iniParamsReserved(0),
 
 		constants_run(false),
-		frame_no(0),
 		hWnd(NULL),
 		hide_cursor(false),
 		cursor_upscaling_bypass(true),
@@ -696,8 +682,6 @@ struct Globals
 	{
 		int i;
 
-		SHADER_PATH[0] = 0;
-		SHADER_CACHE_PATH[0] = 0;
 		CHAIN_DLL_PATH[0] = 0;
 
 		ANALYSIS_PATH[0] = 0;
@@ -711,56 +695,6 @@ struct Globals
 		ticks_at_launch = GetTickCount();
 	}
 };
-
-// Everything in this struct has a unique copy per thread. It would be vastly
-// simpler to just use the "thread_local" keyword, but MSDN warns that it can
-// interfere with delay loading DLLs (without any detail as to what it means by
-// that), so to err on the side of caution I'm using the old Win32 TLS API. We
-// are using a structure to ensure we only consume a single TLS slot since they
-// are limited, regardless of how many thread local variables we might want in
-// the future. Use the below accessor function to get a pointer to this
-// structure for the current thread.
-struct TLS
-{
-	// This is set before calling into a DirectX function known to be
-	// problematic if hooks are in use that can lead to one of our
-	// functions being called unexpectedly if DirectX (or a third party
-	// tool sitting between us and DirectX) has implemented the function we
-	// are calling in terms of other hooked functions. We check if it is
-	// set from any function known to be one called by DirectX and call
-	// straight through to the original function if it is set.
-	//
-	// This is very much a band-aid solution to one of the fundamental
-	// problems associated with hooking, but unfortunately hooking is a
-	// reality we cannot avoid and in many cases a necessary evil to solve
-	// certain problems. This is not a complete solution - it protects
-	// against known cases where a function we call can manage to call back
-	// into us, but does not protect against unknown cases of the same
-	// problem, or cases where we call a function that has been hooked by a
-	// third party tool (which we can use other strategies to avoid, such
-	// as the unhookable UnhookableCreateDevice).
-	bool hooking_quirk_protection;
-
-	LockStack locks_held;
-
-	TLS() :
-		hooking_quirk_protection(false)
-	{}
-};
-
-extern DWORD tls_idx;
-static struct TLS* get_tls()
-{
-	TLS *tls;
-
-	tls = (TLS*)TlsGetValue(tls_idx);
-	if (!tls) {
-		tls = new TLS();
-		TlsSetValue(tls_idx, tls);
-	}
-
-	return tls;
-}
 
 extern Globals *G;
 

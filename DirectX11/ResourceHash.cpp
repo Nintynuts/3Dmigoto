@@ -1,17 +1,23 @@
 #include "ResourceHash.h"
 
-#include <INITGUID.h>
-#include "log.h"
-#include "util.h"
 #include "globals.h"
 #include "profiling.h"
 #include "overlay.h"
+#include "texture.h"
+#include "type_name_dx11.h"
 
 // DirectXTK headers fail to include their own pre-requisits. We just want
 // GetSurfaceInfo from LoaderHelpers
 #include "DirectXTK/Src/pch.h"
 #include "DirectXTK/Src/PlatformHelpers.h"
 #include "DirectXTK/Src/LoaderHelpers.h"
+
+#include <hash.h>
+#include <log.h>
+
+#include <INITGUID.h>
+
+using namespace std;
 
 // Overloaded functions to log any kind of resource description (useful to call
 // from templates):

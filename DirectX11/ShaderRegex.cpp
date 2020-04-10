@@ -1,10 +1,14 @@
 #include "ShaderRegex.h"
 #include "CommandList.h"
 #include "globals.h" // For ShaderOverride FIXME: This should be in a separate header
-#include "log.h"
+
+#include <log.h>
+#include <files.h>
 
 #include <algorithm>
 #include <iterator>
+
+using namespace std;
 
 ShaderRegexGroups shader_regex_groups;
 std::vector<ShaderRegexGroup*> shader_regex_group_index;

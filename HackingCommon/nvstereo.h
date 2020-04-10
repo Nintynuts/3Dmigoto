@@ -69,9 +69,9 @@
 #include "nvapi.h"
 
 // vvvvv 3DMIGOTO ADDITION vvvvv
-#include "log.h"
+#include <log.h>
+#include <lock.h>
 #include "profiling.h"
-#include "util.h"
 // ^^^^^ 3DMIGOTO ADDITION ^^^^^
 
 namespace nv {

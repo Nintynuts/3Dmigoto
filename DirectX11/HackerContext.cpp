@@ -12,18 +12,22 @@
 
 #include "HackerContext.h"
 
-//#include "HookedContext.h"
-
-#include "log.h"
 #include "Globals.h"
-
+#include "HookedContext.h"
 #include "HackerDevice.h"
 #include "D3D11Wrapper.h"
-//#include "ResourceHash.h"
-//#include "Override.h"
 #include "ShaderRegex.h"
 #include "FrameAnalysis.h"
 #include "profiling.h"
+#include "texture.h"
+#include "Assembler.h"
+
+#include <log.h>
+#include <beep.h>
+#include <shader_dump.h>
+#include <type_name.h> // nothing DX10 specific
+
+using namespace std;
 
 // -----------------------------------------------------------------------------------------------
 

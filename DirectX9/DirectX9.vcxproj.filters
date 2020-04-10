@@ -29,14 +29,10 @@
     <ClCompile Include="D3DFont.cpp" />
     <ClCompile Include="Override.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="..\crc32c-hw-1.0.5\src\crc32c.cpp" />
-    <ClCompile Include="..\HLSLDecompiler\DecompileHLSL.cpp" />
-    <ClCompile Include="..\D3D_Shaders\Assembler.cpp" />
-    <ClCompile Include="..\D3D_Shaders\SignatureParser.cpp" />
     <ClCompile Include="HookedStateBlock.cpp" />
     <ClCompile Include="profiling.cpp" />
-    <ClCompile Include="..\util.cpp" />
     <ClCompile Include="cursor.cpp" />
+    <ClCompile Include="om_state.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3d9Wrapper.h" />
@@ -61,11 +57,9 @@
     <ClInclude Include="ResourceHash.h" />
     <ClInclude Include="Override.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="..\vkeys.h" />
     <ClInclude Include="Hunting.h" />
     <ClInclude Include="nvprofile.h" />
     <ClInclude Include="ShaderRegex.h" />
-    <ClInclude Include="..\log.h" />
     <ClInclude Include="ConstantsTable.h" />
     <ClInclude Include="DLLMainHookDX9.h" />
     <ClInclude Include="HookedDeviceDX9.h" />
@@ -86,9 +80,6 @@
     <ClInclude Include="HookedQuery.h" />
     <ClInclude Include="HookedVertexDeclaration.h" />
     <ClInclude Include="D3DFont.h" />
-    <ClInclude Include="..\util.h" />
-    <ClInclude Include="..\crc32c-hw-1.0.5\include\crc32c.h" />
-    <ClInclude Include="..\HLSLDecompiler\DecompileHLSL.h" />
     <ClInclude Include="Direct3DBaseTexture9Functions.h" />
     <ClInclude Include="HookedD3DXFunctions.h" />
     <ClInclude Include="HookedD3DX.h" />
@@ -100,6 +91,9 @@
     <ClInclude Include="FrameAnalysis.h" />
     <ClInclude Include="FrameAnalysisFunctions.h" />
     <ClInclude Include="cursor.h" />
+    <ClInclude Include="texture.h" />
+    <ClInclude Include="om_state.h" />
+    <ClInclude Include="type_name_dx9.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="d3d9Wrapper.def" />

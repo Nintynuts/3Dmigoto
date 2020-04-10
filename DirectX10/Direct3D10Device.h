@@ -1452,7 +1452,7 @@ STDMETHODIMP_(void) D3D10Wrapper::ID3D10Device::RSSetViewports(THIS_
 	LogDebug("ID3D10Device::RSSetViewports called with NumViewports = %d\n", NumViewports);
 	
 	GetD3D10Device()->RSSetViewports(NumViewports, pViewports);
-	if (gLogFile)
+	if (LogFile)
 	{
 		if (pViewports)
 		{
@@ -1886,7 +1886,7 @@ STDMETHODIMP_(void) D3D10Wrapper::ID3D10Device::RSGetViewports(THIS_
 	LogDebug("ID3D10Device::RSGetViewports called\n");
 	
 	GetD3D10Device()->RSGetViewports(NumViewports, pViewports);
-	if (gLogFile)
+	if (LogFile)
 	{
 		if (pViewports)
 		{
@@ -2156,7 +2156,7 @@ static char *ReplaceShader(D3D10Base::ID3D10Device *realDevice, UINT64 hash, con
 				{
 					FILE *f;
 					_wfopen_s(&f, val, L"wb");
-					if (gLogFile)
+					if (LogFile)
 					{
 						char fileName[MAX_PATH];
 						wcstombs(fileName, val, MAX_PATH);
@@ -2284,12 +2284,12 @@ static char *ReplaceShader(D3D10Base::ID3D10Device *realDevice, UINT64 hash, con
 
 					LogInfo("    compile result of replacement HLSL shader: %x\n", ret);
 
-					if (gLogFile && pErrorMsgs)
+					if (LogFile && pErrorMsgs)
 					{
 						LPVOID errMsg = pErrorMsgs->GetBufferPointer();
 						SIZE_T errSize = pErrorMsgs->GetBufferSize();
 						LogInfo("--------------------------------------------- BEGIN ---------------------------------------------\n");
-						fwrite(errMsg, 1, errSize - 1, gLogFile);
+						fwrite(errMsg, 1, errSize - 1, LogFile);
 						LogInfo("---------------------------------------------- END ----------------------------------------------\n");
 						pErrorMsgs->Release();
 					}
@@ -2300,7 +2300,7 @@ static char *ReplaceShader(D3D10Base::ID3D10Device *realDevice, UINT64 hash, con
 						wsprintf(val, L"%ls\\%08lx%08lx-%ls_replace.bin", G->SHADER_PATH, (UINT32)(hash >> 32), (UINT32)(hash), shaderType);
 						FILE *fw;
 						_wfopen_s(&fw, val, L"wb");
-						if (gLogFile)
+						if (LogFile)
 						{
 							char fileName[MAX_PATH];
 							wcstombs(fileName, val, MAX_PATH);
@@ -2406,7 +2406,7 @@ static char *ReplaceShader(D3D10Base::ID3D10Device *realDevice, UINT64 hash, con
 				if (!errorOccurred && ((G->EXPORT_HLSL >= 1) || (G->EXPORT_FIXED && patched)))
 				{
 					_wfopen_s(&fw, val, L"wb");
-					if (gLogFile)
+					if (LogFile)
 					{
 						char fileName[MAX_PATH];
 						wcstombs(fileName, val, MAX_PATH);
@@ -2448,14 +2448,14 @@ static char *ReplaceShader(D3D10Base::ID3D10Device *realDevice, UINT64 hash, con
 						"main", shaderModel.c_str(), D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &pCompiledOutput, &pErrorMsgs);
 					LogInfo("    compile result of fixed HLSL shader: %x\n", ret);
 
-					if (gLogFile && pErrorMsgs)
+					if (LogFile && pErrorMsgs)
 					{
 						LPVOID errMsg = pErrorMsgs->GetBufferPointer();
 						SIZE_T errSize = pErrorMsgs->GetBufferSize();
 						LogInfo("--------------------------------------------- BEGIN ---------------------------------------------\n");
-						fwrite(errMsg, 1, errSize - 1, gLogFile);
+						fwrite(errMsg, 1, errSize - 1, LogFile);
 						LogInfo("------------------------------------------- HLSL code -------------------------------------------\n");
-						fwrite(decompiledCode.c_str(), 1, decompiledCode.size(), gLogFile);
+						fwrite(decompiledCode.c_str(), 1, decompiledCode.size(), LogFile);
 						LogInfo("\n---------------------------------------------- END ----------------------------------------------\n");
 
 						// And write the errors to the HLSL file as comments too, as a more convenient spot to see them.
@@ -2582,14 +2582,14 @@ static char *ReplaceShader(D3D10Base::ID3D10Device *realDevice, UINT64 hash, con
 					delete code;
 				}
 
-				if (gLogFile && pErrorMsgs)
+				if (LogFile && pErrorMsgs)
 				{
 					LPVOID errMsg = pErrorMsgs->GetBufferPointer();
 					SIZE_T errSize = pErrorMsgs->GetBufferSize();
 					LogInfo("--------------------------------------------- BEGIN ---------------------------------------------\n");
-					fwrite(errMsg, 1, errSize - 1, gLogFile);
+					fwrite(errMsg, 1, errSize - 1, LogFile);
 					LogInfo("------------------------------------------- HLSL code -------------------------------------------\n");
-					fwrite(decompiledCode.c_str(), 1, decompiledCode.size(), gLogFile);
+					fwrite(decompiledCode.c_str(), 1, decompiledCode.size(), LogFile);
 					LogInfo("\n---------------------------------------------- END ----------------------------------------------\n");
 					pErrorMsgs->Release();
 				}
@@ -2975,7 +2975,7 @@ STDMETHODIMP D3D10Wrapper::ID3D10Device::CreateQuery(THIS_
             /* [annotation] */ 
             __out_opt  D3D10Base::ID3D10Query **ppQuery)
 {
-	if (gLogFile) 
+	if (LogFile) 
 	{
 		LogInfo("ID3D10Device::CreateQuery called with parameters\n");
 		switch (pQueryDesc->Query)

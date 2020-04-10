@@ -1,12 +1,16 @@
 #include "IniHandler.h"
 
-#include <string>
-
 #include "Main.h"
 #include "globals.h"
 #include "Override.h"
 #include "Hunting.h"
 
+#include <ini_util.h>
+#include <beep.h>
+#include <enum.h>
+#include <log.h>
+
+#include <string>
 
 static char *readStringParameter(wchar_t *val)
 {
@@ -324,8 +328,8 @@ void LoadConfigFile()
 	// [Logging]
 	if (GetPrivateProfileInt(L"Logging", L"calls", 1, iniFile))
 	{
-		if (!gLogFile)
-			gLogFile = _fsopen("d3d10_log.txt", "w", _SH_DENYNO);
+		if (!LogFile)
+			LogFile = _fsopen("d3d10_log.txt", "w", _SH_DENYNO);
 		LogInfo("\nD3D10 DLL starting init  -  %s\n\n", LogTime().c_str());
 		LogInfo("----------- d3dx.ini settings -----------\n");
 	}
@@ -340,7 +344,7 @@ void LoadConfigFile()
 	int unbuffered = -1;
 	if (GetPrivateProfileInt(L"Logging", L"unbuffered", 0, iniFile))
 	{
-		unbuffered = setvbuf(gLogFile, NULL, _IONBF, 0);
+		unbuffered = setvbuf(LogFile, NULL, _IONBF, 0);
 	}
 
 	// Set the CPU affinity based upon d3dx.ini setting.  Useful for debugging and shader hunting in AC3.
@@ -365,7 +369,7 @@ void LoadConfigFile()
 			__debugbreak();
 	}
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Logging]\n");
 		LogInfo("  calls=1\n");
@@ -380,7 +384,7 @@ void LoadConfigFile()
 	// Todo: No proxy for now, need to add to InitD310
 
 	//GetPrivateProfileString(L"System", L"proxy_D3D10", 0, DLL_PATH, MAX_PATH, iniFile);
-	//if (gLogFile)
+	//if (LogFile)
 	//{
 	//	LogInfo("[System]\n");
 	//	if (!DLL_PATH) LogInfoW(L"  proxy_D3D10=%s\n", DLL_PATH);
@@ -400,7 +404,7 @@ void LoadConfigFile()
 	G->gForceStereo = GetPrivateProfileInt(L"Device", L"force_stereo", 0, iniFile) == 1;
 	bool allowWindowCommands = GetPrivateProfileInt(L"Device", L"allow_windowcommands", 0, iniFile) == 1; // in DXGI dll
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Device]\n");
 		if (G->SCREEN_WIDTH != -1) LogInfo("  width=%d\n", G->SCREEN_WIDTH);
@@ -418,7 +422,7 @@ void LoadConfigFile()
 	G->gSurfaceCreateMode = GetPrivateProfileInt(L"Stereo", L"surface_createmode", -1, iniFile);
 	G->gSurfaceSquareCreateMode = GetPrivateProfileInt(L"Stereo", L"surface_square_createmode", -1, iniFile);
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Stereo]\n");
 		if (automaticMode) LogInfo("  automatic_mode=1\n");
@@ -469,7 +473,7 @@ void LoadConfigFile()
 	G->EXPORT_HLSL = GetPrivateProfileInt(L"Rendering", L"export_hlsl", 0, iniFile);
 	G->DumpUsage = GetPrivateProfileInt(L"Rendering", L"dump_usage", 0, iniFile) == 1;
 
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("[Rendering]\n");
 		if (G->SHADER_PATH[0])
@@ -640,7 +644,7 @@ void LoadConfigFile()
 			G->iniParams.w = stof(setting);
 	}
 
-	if (gLogFile &&
+	if (LogFile &&
 		(G->iniParams.x != FLT_MAX) || (G->iniParams.y != FLT_MAX) || (G->iniParams.z != FLT_MAX) || (G->iniParams.w != FLT_MAX))
 	{
 		LogInfo("[Constants]\n");

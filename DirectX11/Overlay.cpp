@@ -3,78 +3,33 @@
 
 #include "Overlay.h"
 
-#include <DirectXColors.h>
-//#include <StrSafe.h>
-#include <stdexcept>
-
 #include "SimpleMath.h"
 #include "SpriteBatch.h"
 
-#include "log.h"
-#include "version.h"
 #include "D3D11Wrapper.h"
-//#include "nvapi.h"
 #include "Globals.h"
 #include "profiling.h"
+#include "om_state.h"
 
 #include "HackerDevice.h"
 #include "HackerContext.h"
 
-#define MAX_SIMULTANEOUS_NOTICES 10
+#include <overlay.h>
+#include <log.h>
+#include <version.h>
 
-static bool has_notice = false;
-static unsigned notice_cleared_frame = 0;
+#include <DirectXColors.h>
+#include <stdexcept>
 
-static class Notices
-{
-public:
-	std::vector<OverlayNotice> notices[NUM_LOG_LEVELS];
-	CRITICAL_SECTION lock;
+using namespace std;
 
-	Notices()
-	{
-		InitializeCriticalSectionPretty(&lock);
-	}
-
-	~Notices()
-	{
-		DeleteCriticalSection(&lock);
-	}
-} notices;
-
-struct LogLevelParams {
-	DirectX::XMVECTORF32 colour;
-	DWORD duration;
-	bool hide_in_release;
-	std::unique_ptr<DirectX::SpriteFont> Overlay::*font;
-};
-
-struct LogLevelParams log_levels[] = {
+struct LogLevelParams<DirectX::XMVECTORF32, DirectX::SpriteFont> log_levels[] = {
 	{ DirectX::Colors::Red,       20000, false, &Overlay::mFontNotifications }, // DIRE
 	{ DirectX::Colors::OrangeRed, 10000, false, &Overlay::mFontNotifications }, // WARNING
 	{ DirectX::Colors::OrangeRed, 10000, false, &Overlay::mFontProfiling     }, // WARNING_MONOSPACE
 	{ DirectX::Colors::Orange,     5000,  true, &Overlay::mFontNotifications }, // NOTICE
 	{ DirectX::Colors::LimeGreen,  2000,  true, &Overlay::mFontNotifications }, // INFO
 };
-
-// Side note: Not really stoked with C++ string handling.  There are like 4 or
-// 5 different ways to do things, all partly compatible, none a clear winner in
-// terms of simplicity and clarity.  Generally speaking we'd want to use C++
-// wstring and string, but there are no good output formatters.  Maybe the 
-// newer iostream based pieces, but we'd still need to convert.
-//
-// The philosophy here and in other files, is to use whatever the API that we
-// are using wants.  In this case it's a wchar_t* for DrawString, so we'll not
-// do a lot of conversions and different formats, we'll just use wchar_t and its
-// formatters.
-//
-// In particular, we also want to avoid 5 different libraries for string handling,
-// Microsoft has way too many variants.  We'll use the regular C library from
-// the standard c runtime, but use the _s safe versions.
-
-// Max expected on-screen string size, used for buffer safe calls.
-const int maxstring = 1024;
-
 
 Overlay::Overlay(HackerDevice *pDevice, HackerContext *pContext, IDXGISwapChain *pSwapChain)
 {
@@ -539,26 +494,6 @@ void Overlay::DrawOutlinedString(DirectX::SpriteFont *font, wchar_t const *text,
 
 // -----------------------------------------------------------------------------
 
-// The active shader will show where we are in each list. / 0 / 0 will mean that we are not 
-// actively searching. 
-
-static void AppendShaderText(wchar_t *fullLine, wchar_t *type, int pos, size_t size)
-{
-	if (size == 0)
-		return;
-
-	// The position is zero based, so we'll make it +1 for the humans.
-	if (++pos == 0)
-		size = 0;
-
-	// Format: "VS:1/15"
-	wchar_t append[maxstring];
-	swprintf_s(append, maxstring, L"%ls:%d/%Iu ", type, pos, size);
-
-	wcscat_s(fullLine, maxstring, append);
-}
-
-
 // We also want to show the count of active vertex, pixel, compute, geometry, domain, hull
 // shaders, that are active in the frame.  Any that have a zero count will be stripped, to
 // keep it from being too busy looking.
@@ -843,54 +778,13 @@ OverlayNotice::OverlayNotice(std::wstring message) :
 {
 }
 
-void ClearNotices()
-{
-	int level;
-
-	if (notice_cleared_frame == G->frame_no)
-		return;
-
-	EnterCriticalSectionPretty(&notices.lock);
-
-	for (level = 0; level < NUM_LOG_LEVELS; level++)
-		notices.notices[level].clear();
-
-	notice_cleared_frame = G->frame_no;
-	has_notice = false;
-
-	LeaveCriticalSection(&notices.lock);
-}
-
-void LogOverlayW(LogLevel level, wchar_t *fmt, ...)
-{
-	wchar_t msg[maxstring];
-	va_list ap;
-
-	va_start(ap, fmt);
-	vLogInfoW(fmt, ap);
-
-	// Using _vsnwprintf_s so we don't crash if the message is too long for
-	// the buffer, and truncate it instead - unless we can automatically
-	// wrap the message, which DirectXTK doesn't appear to support, who
-	// cares if it gets cut off somewhere off screen anyway?
-	_vsnwprintf_s(msg, maxstring, _TRUNCATE, fmt, ap);
-
-	EnterCriticalSectionPretty(&notices.lock);
-
-	notices.notices[level].emplace_back(msg);
-	has_notice = true;
-
-	LeaveCriticalSection(&notices.lock);
-
-	va_end(ap);
-}
 
 // ASCII version of the above. DirectXTK only understands wide strings, so we
 // need to convert it to that, but we can't just convert the format and hand it
 // to LogOverlayW, because that would reverse the meaning of %s and %S in the
 // format string. Instead we do our own vLogInfo and _vsnprintf_s to handle the
 // format string correctly and convert the result to a wide string.
-void LogOverlay(LogLevel level, char *fmt, ...)
+void LogOverlay(LogLevel level, const char* fmt, ...)
 {
 	char amsg[maxstring];
 	wchar_t wmsg[maxstring];

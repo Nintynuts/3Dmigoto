@@ -16,24 +16,31 @@
 #include "HookedDevice.h"
 #include "FrameAnalysis.h"
 
-#include <D3Dcompiler.h>
-#include <codecvt>
-
-#include "nvapi.h"
-#include "log.h"
-#include "util.h"
 #include "shader.h"
 #include "DecompileHLSL.h"
 #include "HackerContext.h"
 #include "HackerDXGI.h"
-
 #include "D3D11Wrapper.h"
 #include "SpriteFont.h"
-#include "D3D_Shaders\stdafx.h"
+#include "Assembler.h"
 #include "ResourceHash.h"
 #include "ShaderRegex.h"
 #include "CommandList.h"
 #include "Hunting.h"
+#include "type_name_dx11.h"
+
+#include <beep.h>
+#include <nvapi.h>
+#include <log.h>
+#include <files.h>
+#include <hash.h>
+#include <util.h>
+#include <shader_dump.h>
+
+#include <D3Dcompiler.h>
+#include <codecvt>
+
+using namespace std;
 
 // A map to look up the HackerDevice from an IUnknown. The reason for using an
 // IUnknown as the key is that an ID3D11Device and IDXGIDevice are actually two
@@ -438,11 +445,9 @@ HRESULT HackerDevice::SetGlobalNVSurfaceCreationMode()
 	return S_OK;
 }
 
-
 // With the addition of full DXGI support, this init sequence is too dangerous
 // to do at object creation time.  The NV CreateHandleFromIUnknown calls back
 // into this device, so we need to have it set up and ready.
-
 void HackerDevice::Create3DMigotoResources()
 {
 	LogInfo("HackerDevice::Create3DMigotoResources(%s@%p) called.\n", type_name(this), this);
@@ -578,299 +583,6 @@ static void RegisterForReload(ID3D11DeviceChild* ppShader, UINT64 hash, wstring 
 	G->mReloadedShaders[ppShader].deferred_replacement_candidate = deferred_replacement_candidate;
 	G->mReloadedShaders[ppShader].deferred_replacement_processed = false;
 }
-
-
-// Helper routines for ReplaceShader, as a way to factor out some of the inline code, in
-// order to make it more clear, and as a first step toward full refactoring.
-
-// This routine exports the original binary shader from the game, the cso.  It is a hidden
-// feature in the d3dx.ini.  Seems like it might be nice to have them named *_orig.bin, to
-// make them more clear.
-
-static void ExportOrigBinary(UINT64 hash, const wchar_t *pShaderType, const void *pShaderBytecode, SIZE_T pBytecodeLength)
-{
-	wchar_t path[MAX_PATH];
-	HANDLE f;
-	bool exists = false;
-
-	swprintf_s(path, MAX_PATH, L"%ls\\%016llx-%ls.bin", G->SHADER_CACHE_PATH, hash, pShaderType);
-	f = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (f != INVALID_HANDLE_VALUE)
-	{
-		int cnt = 0;
-		while (f != INVALID_HANDLE_VALUE)
-		{
-			// Check if same file.
-			DWORD dataSize = GetFileSize(f, 0);
-			char *buf = new char[dataSize];
-			DWORD readSize;
-			if (!ReadFile(f, buf, dataSize, &readSize, 0) || dataSize != readSize)
-				LogInfo("  Error reading file.\n");
-			CloseHandle(f);
-			if (dataSize == pBytecodeLength && !memcmp(pShaderBytecode, buf, dataSize))
-				exists = true;
-			delete[] buf;
-			if (exists)
-				break;
-			swprintf_s(path, MAX_PATH, L"%ls\\%016llx-%ls_%d.bin", G->SHADER_CACHE_PATH, hash, pShaderType, ++cnt);
-			f = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		}
-	}
-	if (!exists)
-	{
-		FILE *fw;
-		wfopen_ensuring_access(&fw, path, L"wb");
-		if (fw)
-		{
-			LogInfoW(L"    storing original binary shader to %s\n", path);
-			fwrite(pShaderBytecode, 1, pBytecodeLength, fw);
-			fclose(fw);
-		}
-		else
-		{
-			LogInfoW(L"    error storing original binary shader to %s\n", path);
-		}
-	}
-}
-
-
-static bool GetFileLastWriteTime(wchar_t *path, FILETIME *ftWrite)
-{
-	HANDLE f;
-
-	f = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (f == INVALID_HANDLE_VALUE)
-		return false;
-
-	GetFileTime(f, NULL, NULL, ftWrite);
-	CloseHandle(f);
-	return true;
-}
-
-static bool CheckCacheTimestamp(HANDLE binHandle, wchar_t *binPath, FILETIME &pTimeStamp)
-{
-	FILETIME txtTime, binTime;
-	wchar_t txtPath[MAX_PATH], *end = NULL;
-
-	wcscpy_s(txtPath, MAX_PATH, binPath);
-	end = wcsstr(txtPath, L".bin");
-	wcscpy_s(end, sizeof(L".bin"), L".txt");
-	if (GetFileLastWriteTime(txtPath, &txtTime) && GetFileTime(binHandle, NULL, NULL, &binTime)) {
-		// We need to compare the timestamp on the .bin and .txt files.
-		// This needs to be an exact match to ensure that the .bin file
-		// corresponds to this .txt file (and we need to explicitly set
-		// this timestamp when creating the .bin file). Just checking
-		// for newer modification time is not enough, since the .txt
-		// files in the zip files that fixes are distributed in contain
-		// a timestamp that may be older than .bin files generated on
-		// an end-users system.
-		if (CompareFileTime(&binTime, &txtTime))
-			return false;
-
-		// It no longer matters which timestamp we save for later
-		// comparison, since they need to match, but we save the .txt
-		// file's timestamp since that is the one we are comparing
-		// against later.
-		pTimeStamp = txtTime;
-		return true;
-	}
-
-	// If we couldn't get the timestamps it probably means the
-	// corresponding .txt file no longer exists. This is actually a bit of
-	// an odd (but not impossible) situation to be in - if a user used
-	// uninstall.bat when updating a fix they should have removed any stale
-	// .bin files as well, and if they didn't use uninstall.bat then they
-	// should only be adding new files... so how did a shader that used to
-	// be present disappear but leave the cache next to it?
-	//
-	// A shaderhacker might hit this if they removed the .txt file but not
-	// the .bin file, but we could consider that to be user error, so it's
-	// not clear any policy here would be correct. Alternatively, a fix
-	// might have been shipped with only .bin files - historically we have
-	// allowed (but discouraged) that scenario, so for now we issue a
-	// warning but allow it.
-	LogInfo("    WARNING: Unable to validate timestamp of %S"
-			" - no corresponding .txt file?\n", binPath);
-	return true;
-}
-
-static bool LoadCachedShader(wchar_t *binPath, const wchar_t *pShaderType,
-	__out char* &pCode, SIZE_T &pCodeSize, string &pShaderModel, FILETIME &pTimeStamp)
-{
-	HANDLE f;
-	DWORD codeSize, readSize;
-
-	f = CreateFile(binPath, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (f == INVALID_HANDLE_VALUE)
-		return false;
-
-	if (!CheckCacheTimestamp(f, binPath, pTimeStamp)) {
-		LogInfoW(L"    Discarding stale cached shader: %s\n", binPath);
-		goto bail_close_handle;
-	}
-
-	LogInfoW(L"    Replacement binary shader found: %s\n", binPath);
-	WarnIfConflictingShaderExists(binPath, end_user_conflicting_shader_msg);
-
-	codeSize = GetFileSize(f, 0);
-	pCode = new char[codeSize];
-	if (!ReadFile(f, pCode, codeSize, &readSize, 0)
-		|| codeSize != readSize)
-	{
-		LogInfo("    Error reading binary file.\n");
-		goto err_free_code;
-	}
-
-	pCodeSize = codeSize;
-	LogInfo("    Bytecode loaded. Size = %Iu\n", pCodeSize);
-	CloseHandle(f);
-
-	pShaderModel = "bin";		// tag it as reload candidate, but needing disassemble
-
-	return true;
-
-err_free_code:
-	delete[] pCode;
-	pCode = NULL;
-bail_close_handle:
-	CloseHandle(f);
-	return false;
-}
-
-// Load .bin shaders from the ShaderFixes folder as cached shaders.
-// This will load either *_replace.bin, or *.bin variants.
-
-static bool LoadBinaryShaders(__in UINT64 hash, const wchar_t *pShaderType,
-	__out char* &pCode, SIZE_T &pCodeSize, string &pShaderModel, FILETIME &pTimeStamp)
-{
-	wchar_t path[MAX_PATH];
-
-	swprintf_s(path, MAX_PATH, L"%ls\\%016llx-%ls_replace.bin", G->SHADER_PATH, hash, pShaderType);
-	if (LoadCachedShader(path, pShaderType, pCode, pCodeSize, pShaderModel, pTimeStamp))
-		return true;
-
-	// If we can't find an HLSL compiled version, look for ASM assembled one.
-	swprintf_s(path, MAX_PATH, L"%ls\\%016llx-%ls.bin", G->SHADER_PATH, hash, pShaderType);
-	return LoadCachedShader(path, pShaderType, pCode, pCodeSize, pShaderModel, pTimeStamp);
-}
-
-
-// Load an HLSL text file as the replacement shader.  Recompile it using D3DCompile.
-// If caching is enabled, save a .bin replacement for this new shader.
-
-static bool ReplaceHLSLShader(__in UINT64 hash, const wchar_t *pShaderType,
-	__in const void *pShaderBytecode, SIZE_T pBytecodeLength, const char *pOverrideShaderModel,
-	__out char* &pCode, SIZE_T &pCodeSize, string &pShaderModel, FILETIME &pTimeStamp, wstring &pHeaderLine)
-{
-	wchar_t path[MAX_PATH];
-	HANDLE f;
-	string shaderModel;
-
-	swprintf_s(path, MAX_PATH, L"%ls\\%016llx-%ls_replace.txt", G->SHADER_PATH, hash, pShaderType);
-	f = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (f != INVALID_HANDLE_VALUE)
-	{
-		LogInfo("    Replacement shader found. Loading replacement HLSL code.\n");
-		WarnIfConflictingShaderExists(path, end_user_conflicting_shader_msg);
-
-		DWORD srcDataSize = GetFileSize(f, 0);
-		char *srcData = new char[srcDataSize];
-		DWORD readSize;
-		FILETIME ftWrite;
-		if (!ReadFile(f, srcData, srcDataSize, &readSize, 0)
-			|| !GetFileTime(f, NULL, NULL, &ftWrite)
-			|| srcDataSize != readSize)
-			LogInfo("    Error reading file.\n");
-		CloseHandle(f);
-		LogInfo("    Source code loaded. Size = %d\n", srcDataSize);
-
-		// Disassemble old shader to get shader model.
-		shaderModel = GetShaderModel(pShaderBytecode, pBytecodeLength);
-		if (shaderModel.empty())
-		{
-			LogInfo("    disassembly of original shader failed.\n");
-
-			delete[] srcData;
-		}
-		else
-		{
-			// Any HLSL compiled shaders are reloading candidates, if moved to ShaderFixes
-			pShaderModel = shaderModel;
-			pTimeStamp = ftWrite;
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> utf8_to_utf16;
-			pHeaderLine = utf8_to_utf16.from_bytes(srcData, strchr(srcData, '\n'));
-
-			// Way too many obscure interractions in this function, using another
-			// temporary variable to not modify anything already here and reduce
-			// the risk of breaking it in some subtle way:
-			const char *tmpShaderModel;
-			char apath[MAX_PATH];
-
-			if (pOverrideShaderModel)
-				tmpShaderModel = pOverrideShaderModel;
-			else
-				tmpShaderModel = shaderModel.c_str();
-
-			// Compile replacement.
-			LogInfo("    compiling replacement HLSL code with shader model %s\n", tmpShaderModel);
-
-			// TODO: Add #defines for StereoParams and IniParams
-
-			ID3DBlob *errorMsgs; // FIXME: This can leak
-			ID3DBlob *compiledOutput = 0;
-			// Pass the real filename and use the standard include handler so that
-			// #include will work with a relative path from the shader itself.
-			// Later we could add a custom include handler to track dependencies so
-			// that we can make reloading work better when using includes:
-			wcstombs(apath, path, MAX_PATH);
-			MigotoIncludeHandler include_handler(apath);
-			HRESULT ret = D3DCompile(srcData, srcDataSize, apath, 0,
-				G->recursive_include == -1 ? D3D_COMPILE_STANDARD_FILE_INCLUDE : &include_handler,
-				"main", tmpShaderModel, D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, &compiledOutput, &errorMsgs);
-			delete[] srcData; srcData = 0;
-			if (compiledOutput)
-			{
-				pCodeSize = compiledOutput->GetBufferSize();
-				pCode = new char[pCodeSize];
-				memcpy(pCode, compiledOutput->GetBufferPointer(), pCodeSize);
-				compiledOutput->Release(); compiledOutput = 0;
-			}
-
-			LogInfo("    compile result of replacement HLSL shader: %x\n", ret);
-
-			if (LogFile && errorMsgs)
-			{
-				LPVOID errMsg = errorMsgs->GetBufferPointer();
-				SIZE_T errSize = errorMsgs->GetBufferSize();
-				LogInfo("--------------------------------------------- BEGIN ---------------------------------------------\n");
-				fwrite(errMsg, 1, errSize - 1, LogFile);
-				LogInfo("---------------------------------------------- END ----------------------------------------------\n");
-				errorMsgs->Release();
-			}
-
-			// Cache binary replacement.
-			if (G->CACHE_SHADERS && pCode)
-			{
-				swprintf_s(path, MAX_PATH, L"%ls\\%016llx-%ls_replace.bin", G->SHADER_PATH, hash, pShaderType);
-				FILE *fw;
-				wfopen_ensuring_access(&fw, path, L"wb");
-				if (fw)
-				{
-					LogInfo("    storing compiled shader to %S\n", path);
-					fwrite(pCode, 1, pCodeSize, fw);
-					fclose(fw);
-
-					// Set the last modified timestamp on the cached shader to match the
-					// .txt file it is created from, so we can later check its validity:
-					set_file_last_write_time(path, &ftWrite);
-				} else
-					LogInfo("    error writing compiled shader to %S\n", path);
-			}
-		}
-	}
-	return !!pCode;
-}
-
 
 // If a matching file exists, load an ASM text shader as a replacement for a shader.  
 // Reassemble it, and return the binary.

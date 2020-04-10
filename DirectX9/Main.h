@@ -2,29 +2,28 @@
 
 #define INITGUID
 #define NOMINMAX
+#include "Globals.h"
+#include "Overlay.h"
+#include "DrawCallInfo.h"
+
+#include <nvapi.h>
+#include <nvstereo.h>
+#include <PointerSet.h>
 
 // Windows Header Files
 #include <windows.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <stdlib.h>
 #include <tchar.h>
-#include <stdio.h>
 #include <crtdbg.h>
 #include <fstream>
 #include <set>
 #include <unordered_map>
-#include <stdint.h>
+#include <d3d9.h>
 
 using namespace std;
-
-#include <d3d9.h>
-#include <nvapi.h>
-#include "../PointerSet.h"
-#include "DrawCallInfo.h"
-#include <nvstereo.h>
-#include "Globals.h"
-#include "Overlay.h"
 
 namespace D3D9Wrapper
 {

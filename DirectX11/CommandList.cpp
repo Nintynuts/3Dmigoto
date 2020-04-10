@@ -4,10 +4,6 @@
 
 #include "CommandList.h"
 
-#include <DDSTextureLoader.h>
-#include <WICTextureLoader.h>
-#include <algorithm>
-#include <sstream>
 #include "HackerDevice.h"
 #include "HackerContext.h"
 #include "Override.h"
@@ -16,8 +12,21 @@
 #include "profiling.h"
 #include "Hunting.h"
 #include "cursor.h"
+#include "texture.h"
+#include "om_state.h"
 
+#include <hash.h>
+#include <files.h>
+#include <shader_dump.h>
+#include <ini_util.h>
 #include <D3DCompiler.h>
+
+#include <DDSTextureLoader.h>
+#include <WICTextureLoader.h>
+#include <algorithm>
+#include <sstream>
+
+using namespace std;
 
 CustomResources customResources;
 CustomShaders customShaders;

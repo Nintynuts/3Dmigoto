@@ -1,9 +1,12 @@
 #include "nvprofile.h"
 #include "Globals.h"
 #include "IniHandler.h"
+
+#include <beep.h>
+#include <log.h>
+
 #include <unordered_set>
 #include <fstream>
-
 
 ProfileSettings profile_settings;
 

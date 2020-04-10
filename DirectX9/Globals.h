@@ -1,5 +1,15 @@
 #pragma once
+#include "profiling.h"
+#include "CommandList.h"
+#include "ResourceHash.h"
+#include "DLLMainHookDX9.h"
+#include "DecompileHLSL.h"
+
+#include <globals_common.h>
+
+
 #include <d3d9.h>
+#include <DirectXMath.h>
 #include <mutex>
 #include <ctime>
 #include <vector>
@@ -7,15 +17,6 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
-
-#include "profiling.h"
-#include "CommandList.h"
-#include "ResourceHash.h"
-#include "DLLMainHookDX9.h"
-#include <DirectXMath.h>
-#include "DecompileHLSL.h"
-
-
 
 namespace D3D9Wrapper {
 	class IDirect3DShader9;
@@ -41,11 +42,6 @@ __declspec (align(8)) extern volatile LONG shared_cursor_update_required;
 extern HWND shared_hWnd;
 class CommandListCommand;
 class CommandList;
-enum HuntingMode {
-	HUNTING_MODE_DISABLED = 0,
-	HUNTING_MODE_ENABLED = 1,
-	HUNTING_MODE_SOFT_DISABLED = 2,
-};
 enum class MarkingMode {
 	SKIP,
 	ORIGINAL,
@@ -388,7 +384,7 @@ struct ResolutionInfo
 	{}
 };
 
-struct Globals
+struct Globals : public GlobalsBase
 {
 private:
 	HWND local_hWnd; // To translate mouse coordinates to the window
@@ -500,8 +496,6 @@ public:
 	int helix_StereoParamsVertexReg;
 	int helix_StereoParamsPixelReg;
 
-	wchar_t SHADER_PATH[MAX_PATH];
-	wchar_t SHADER_CACHE_PATH[MAX_PATH];
 	wchar_t CHAIN_DLL_PATH[MAX_PATH];
 	int load_library_redirect;
 
@@ -584,7 +578,6 @@ public:
 
 	int gDirectModeStereoMinSurfaceArea;
 
-	UINT hunting;
 	bool fix_enabled;
 	bool config_reloadable;
 	bool show_original_enabled;
@@ -604,7 +597,7 @@ public:
 	ShaderHashType shader_hash_type;
 	int texture_hash_version;
 	int EXPORT_HLSL;		// 0=off, 1=HLSL only, 2=HLSL+OriginalASM, 3= HLSL+OriginalASM+recompiledASM
-	bool EXPORT_SHADERS, EXPORT_FIXED, EXPORT_BINARY, CACHE_SHADERS, SCISSOR_DISABLE;
+	bool EXPORT_SHADERS, EXPORT_FIXED, EXPORT_BINARY, SCISSOR_DISABLE;
 	int track_texture_updates;
 	uint32_t ZBufferHashToInject;
 	DecompilerSettings decompiler_settings;
@@ -626,7 +619,6 @@ public:
 	CommandList post_clear_dsv_command_list;
 	CommandList constants_command_list;
 	CommandList post_constants_command_list;
-	unsigned frame_no;
 	bool hide_cursor;
 	bool cursor_upscaling_bypass;
 
@@ -704,7 +696,6 @@ public:
 		mSelectedVertexBufferPos(-1),
 		mPinkingShader(0),
 
-		hunting(HUNTING_MODE_DISABLED),
 		fix_enabled(true),
 		config_reloadable(false),
 		show_original_enabled(false),
@@ -725,7 +716,6 @@ public:
 		EXPORT_HLSL(0),
 		EXPORT_FIXED(false),
 		EXPORT_BINARY(false),
-		CACHE_SHADERS(false),
 		DumpUsage(false),
 		ENABLE_TUNE(false),
 		gTuneStep(0.001f),
@@ -733,7 +723,6 @@ public:
 		StereoParamsVertexReg(-1),
 		StereoParamsPixelReg(-1),
 
-		frame_no(0),
 		local_hWnd(NULL),
 		hide_cursor(false),
 		cursor_upscaling_bypass(true),
@@ -823,8 +812,6 @@ public:
 		HELIX_SHADER_PATH_VERTEX[0] = 0;
 		HELIX_SHADER_PATH_PIXEL[0] = 0;
 
-		SHADER_PATH[0] = 0;
-		SHADER_CACHE_PATH[0] = 0;
 		CHAIN_DLL_PATH[0] = 0;
 
 		ANALYSIS_PATH[0] = 0;

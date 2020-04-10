@@ -1,24 +1,14 @@
 #include "D3D11Wrapper.h"
 
-#include "log.h"
 #include "Globals.h"
 #include "IniHandler.h"
 #include "HookedDXGI.h"
-
 #include "nvprofile.h"
 
-//#include <Shlobj.h>
-//#include <Winuser.h>
-//#include <map>
-//#include <vector>
-//#include <set>
-//#include <iterator>
-//#include <string>
-//
-//#include "util.h"
-//#include "Override.h"
-//#include "HackerDevice.h"
-//#include "HackerContext.h"
+#include <beep.h>
+#include <log.h>
+#include <tls.h>
+#include <util.h>
 
 // The Log file and the Globals are both used globally, and these are the actual
 // definitions of the variables.  All other uses will be via the extern in the 

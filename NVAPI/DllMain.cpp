@@ -1,12 +1,11 @@
 #include "Main.h"
 #include <dxgi1_2.h>
 #include <d3d11_1.h>
-
 #include <d3d9.h>
 
-#include "../util.h"
-#include "../nvapi.h"
-#include "../log.h"
+#include <nvapi.h>
+#include <log.h>
+#include <version.h>
 
 using namespace std;
 

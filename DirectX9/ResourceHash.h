@@ -1,16 +1,20 @@
 #pragma once
-#include "util.h"
+#include "DrawCallInfo.h"
+
+#include <enum.h>
+#include <nvapi.h>
+
 #include <stdint.h>
 #include <tuple>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <vector>
 #include <memory>
 #include <algorithm>
 #include <atomic>
-#include <nvapi.h>
-#include "DrawCallInfo.h"
 #include <d3d9.h>
+
 namespace D3D9Wrapper {
 	class IDirect3DResource9;
 }

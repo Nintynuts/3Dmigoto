@@ -2,7 +2,9 @@
 #include <Shlobj.h>
 #include <Winuser.h>
 
-#include "../util.h"
+#include <util.h>
+#include <type_name.h>
+
 #include "globals.h"
 #include "../HLSLDecompiler/DecompileHLSL.h"
 #include "Override.h"
@@ -14,7 +16,7 @@ ThreadSafePointerSet D3D10Wrapper::ID3D10Device::m_List;
 ThreadSafePointerSet D3D10Wrapper::ID3D10Multithread::m_List;
 
 Globals *G;
-FILE *gLogFile = 0;
+FILE *LogFile = 0;
 bool gLogDebug = false;
 
 
@@ -36,10 +38,10 @@ void InitializeDLL()
 
 void DestroyDLL()
 {
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo("Destroying DLL...\n");
-		fclose(gLogFile);
+		fclose(LogFile);
 	}
 }
 

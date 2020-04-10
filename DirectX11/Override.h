@@ -1,12 +1,12 @@
 #pragma once
+#include "Input.h"
+#include "HackerDevice.h"
+
+#include <enum.h>
 
 #include <DirectXMath.h>
 #include <d3d11_1.h>
 #include <vector>
-
-#include "util.h"
-#include "Input.h"
-#include "HackerDevice.h"
 
 enum class KeyOverrideType {
 	INVALID = -1,
@@ -186,9 +186,9 @@ public:
 
 class KeyOverrideCycleBack : public InputListener
 {
-	shared_ptr<KeyOverrideCycle> cycle;
+	std::shared_ptr<KeyOverrideCycle> cycle;
 public:
-	KeyOverrideCycleBack(shared_ptr<KeyOverrideCycle> cycle) :
+	KeyOverrideCycleBack(std::shared_ptr<KeyOverrideCycle> cycle) :
 		cycle(cycle)
 	{}
 
@@ -200,7 +200,7 @@ class PresetOverride : public Override
 private:
 	bool triggered;
 	bool excluded;
-	unordered_set<CommandListCommand*> triggers_this_frame;
+	std::unordered_set<CommandListCommand*> triggers_this_frame;
 
 public:
 	PresetOverride() :

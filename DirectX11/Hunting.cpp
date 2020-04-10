@@ -1,25 +1,29 @@
 #include "Hunting.h"
 
-#include <string>
-#include <sstream>
-#include <D3Dcompiler.h>
-#include <codecvt>
-
 #include "ScreenGrab.h"
 #include "wincodec.h"
-
 #include "D3D11Wrapper.h"
-#include "util.h"
 #include "DecompileHLSL.h"
 #include "Input.h"
 #include "Override.h"
 #include "Globals.h"
 #include "IniHandler.h"
-#include "D3D_Shaders\stdafx.h"
+#include "Assembler.h"
 #include "CommandList.h"
 #include "profiling.h"
 #include "FrameAnalysis.h"
 #include "ShaderRegex.h"
+
+#include <beep.h>
+#include <files.h>
+#include <shader_dump.h>
+#include <D3Dcompiler.h>
+
+#include <string>
+#include <sstream>
+#include <codecvt>
+
+using namespace std;
 
 // bo3b: For this routine, we have a lot of warnings in x64, from converting a size_t result into the needed
 //  DWORD type for the Write calls.  These are writing 256 byte strings, so there is never a chance that it 
@@ -589,7 +593,7 @@ STDMETHODIMP MigotoIncludeHandler::Close(LPCVOID pData)
 
 // Compile example taken from: http://msdn.microsoft.com/en-us/library/windows/desktop/hh968107(v=vs.85).aspx
 
-static bool RegenerateShader(wchar_t *shaderFixPath, wchar_t *fileName, const char *shaderModel, 
+static bool RegenerateShader(wchar_t *shaderFixPath, wchar_t *fileName, const char *shaderModel,
 	UINT64 hash, wstring shaderType, ID3DBlob *origByteCode,
 	__out FILETIME* timeStamp, __out wstring &headerLine, _Outptr_ ID3DBlob** pCode, string *errText)
 {

@@ -6,6 +6,11 @@
 #include "FrameAnalysis.h"
 #include "Globals.h"
 #include "input.h"
+#include "texture.h"
+
+#include <files.h>
+#include <hash.h>
+#include <type_name.h>
 
 #include <ScreenGrab.h>
 #include <wincodec.h>
@@ -13,10 +18,13 @@
 #include <stdarg.h>
 #include <stdexcept>
 #include <Shlwapi.h>
+#include <memory>
 
 // For windows shortcuts:
 #include <shobjidl.h>
 #include <shlguid.h>
+
+using namespace std;
 
 // Flag introduced in Windows 10 Fall Creators Update
 // Someone was clearly on crack when they decided this flag was necessary

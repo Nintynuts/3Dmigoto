@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "util.h"
+#include "enum.h"
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
 static EnumName_t<wchar_t *, int> VKMappings[] = {
@@ -196,7 +196,7 @@ static int ParseVKey(const wchar_t *name)
 
 // Reverse lookup of key back to string name
 
-static wstring GetKeyName(int key)
+static std::wstring GetKeyName(int key)
 {
 	for (int i = 0; i < ARRAYSIZE(VKMappings); i++) {
 		if (VKMappings[i].val == key) {
