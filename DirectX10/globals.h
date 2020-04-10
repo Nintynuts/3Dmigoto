@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Main.h"
-#include "../util.h"
 #include <DirectXMath.h>
 #include <ctime>
 #include <vector>
 #include <set>
 #include <unordered_map>
+
+#include <enum.h>
+#include <globals_common.h>
 
 const int MARKING_MODE_SKIP = 0;
 const int MARKING_MODE_MONO = 1;
@@ -151,10 +153,8 @@ struct ResourceInfo
 	}
 };
 
-struct Globals
+struct Globals : public GlobalsBase
 {
-	wchar_t SHADER_PATH[MAX_PATH];
-	wchar_t SHADER_CACHE_PATH[MAX_PATH];
 
 	int SCREEN_WIDTH;
 	int SCREEN_HEIGHT;
@@ -166,13 +166,12 @@ struct Globals
 	int gSurfaceCreateMode;
 	int gSurfaceSquareCreateMode;
 
-	bool hunting;
 	bool fix_enabled;
 	bool config_reloadable;
 	time_t huntTime;
 
 	int EXPORT_HLSL;		// 0=off, 1=HLSL only, 2=HLSL+OriginalASM, 3= HLSL+OriginalASM+recompiledASM
-	bool EXPORT_SHADERS, EXPORT_FIXED, CACHE_SHADERS, PRELOAD_SHADERS, SCISSOR_DISABLE;
+	bool EXPORT_SHADERS, EXPORT_FIXED, PRELOAD_SHADERS, SCISSOR_DISABLE;
 	char ZRepair_DepthTextureReg1, ZRepair_DepthTextureReg2;
 	std::string ZRepair_DepthTexture1, ZRepair_DepthTexture2;
 	std::vector<std::string> ZRepair_Dependencies1, ZRepair_Dependencies2;
@@ -259,6 +258,7 @@ struct Globals
 	std::map<UINT64, ShaderInfoData> mPixelShaderInfo; // std::map so that ShaderUsage.txt is sorted - lookup time is O(log N)
 
 	Globals() :
+		GlobalsBase(),
 		mSelectedRenderTargetSnapshot(0),
 		mSelectedRenderTargetPos(0),
 		mSelectedRenderTarget((void *)1),
@@ -275,7 +275,6 @@ struct Globals
 		mSelectedIndexBuffer(1),
 		mSelectedIndexBufferPos(0),
 
-		hunting(false),
 		fix_enabled(true),
 		config_reloadable(false),
 		huntTime(0),
@@ -283,7 +282,6 @@ struct Globals
 		EXPORT_SHADERS(false),
 		EXPORT_HLSL(0),
 		EXPORT_FIXED(false),
-		CACHE_SHADERS(false),
 		PRELOAD_SHADERS(false),
 		FIX_SV_Position(false),
 		FIX_Light_Position(false),
@@ -307,8 +305,6 @@ struct Globals
 		ZBufferHashToInject(0),
 		SCISSOR_DISABLE(0)
 	{
-		SHADER_PATH[0] = 0; 
-		SHADER_CACHE_PATH[0] = 0;
 		mSwapChainInfo.width = -1;
 		mSwapChainInfo.height = -1;
 

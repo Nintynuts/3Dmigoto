@@ -12,16 +12,18 @@
 // IDXGISwapChain3	Win10			1.4
 // IDXGISwapChain4					1.5
 
-#include <d3d11_1.h>
-
 #include "HookedDXGI.h"
 #include "HackerDXGI.h"
-
 #include "DLLMainHook.h"
-#include "log.h"
-#include "util.h"
 #include "D3D11Wrapper.h"
+#include "type_name_dx11.h"
 
+#include <log.h>
+#include <beep.h>
+#include <tls.h>
+#include <util.h>
+
+#include <d3d11_1.h>
 
 // This class is for a different approach than the wrapping of the system objects
 // like we do with ID3D11Device for example.  When we wrap a COM object like that,

@@ -1,9 +1,12 @@
 #include "ResourceHash.h"
-#include "log.h"
-#include "util.h"
 #include "Globals.h"
 #include "Overlay.h"
 #include "Main.h"
+#include "texture.h"
+
+#include <log.h>
+#include <hash.h>
+
 int StrResourceDesc(char *buf, size_t size, ::D3DVERTEXBUFFER_DESC *desc) {
 	return _snprintf_s(buf, size, size, "type=Vertex Buffer byte_width=%u "
 		"usage=\"%S\" FVF=0x%x format=\"%S\" "

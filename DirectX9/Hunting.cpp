@@ -1,14 +1,19 @@
-#include "Hunting.h"
 #include "Main.h"
-#include <sstream>
-#include <string>
-#include <D3Dcompiler.h>
-#include <codecvt>
+
+#include "Hunting.h"
 #include "DecompileHLSL.h"
 #include "Override.h"
 #include "IniHandler.h"
-#include "D3D_Shaders\stdafx.h"
 #include "ConstantsTable.h"
+
+#include <Assembler.h>
+#include <dump_shader.h>
+
+#include <D3Dcompiler.h>
+#include <codecvt>
+#include <sstream>
+#include <string>
+
 #define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1)
 
 // bo3b: For this routine, we have a lot of warnings in x64, from converting a size_t result into the needed

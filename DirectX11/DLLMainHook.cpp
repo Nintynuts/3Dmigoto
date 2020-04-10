@@ -2,8 +2,10 @@
 
 #include "HookedDXGI.h"
 #include "D3D11Wrapper.h"
-#include "util_min.h"
+#include "ini_parser_lite.h"
 #include "globals.h"
+
+#include <tls.h>
 
 HINSTANCE migoto_handle;
 
@@ -307,9 +309,6 @@ out_close:
 // dll search path, this is also now used for DXGI Present hooking.
 //
 // If we return false here, then the game will error out and not run.
-
-
-DWORD tls_idx = TLS_OUT_OF_INDEXES;
 
 BOOL WINAPI DllMain(
 	_In_  HINSTANCE hinstDLL,

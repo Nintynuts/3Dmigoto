@@ -3,7 +3,7 @@
 // Generic #define variables used in this file.
 
 // Actual version and copyright info from this file
-#include "..\version.h"
+#include "version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////

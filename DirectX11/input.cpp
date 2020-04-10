@@ -1,14 +1,15 @@
 #include "Input.h"
+#include "IniHandler.h"
+
+#include <log.h>
+#include <vkeys.h>
 
 #include <Xinput.h>
 #include <vector>
 #include <algorithm>
 #include <sstream>
 
-#include "log.h"
-#include "util.h"
-#include "vkeys.h"
-#include "IniHandler.h"
+using namespace std;
 
 // Set a function pointer to the xinput get state call. By default, set it to
 // XInputGetState() in whichever xinput we are linked to (xinput9_1_0.dll). If

@@ -1,7 +1,9 @@
 #include <string>
 
+#include <beep.h>
+#include <log.h>
+
 #include "Main.h"
-#include "../util.h"
 #include "input.h"
 #include "Override.h"
 #include "globals.h"
@@ -409,12 +411,12 @@ static bool CompileShader(wchar_t *shaderFixPath, wchar_t *fileName, const char 
 
 	LogInfo("    compile result of replacement HLSL shader: %x\n", ret);
 
-	if (gLogFile && pErrorMsgs)
+	if (LogFile && pErrorMsgs)
 	{
 		LPVOID errMsg = pErrorMsgs->GetBufferPointer();
 		SIZE_T errSize = pErrorMsgs->GetBufferSize();
 		LogInfo("--------------------------------------------- BEGIN ---------------------------------------------\n");
-		fwrite(errMsg, 1, errSize - 1, gLogFile);
+		fwrite(errMsg, 1, errSize - 1, LogFile);
 		LogInfo("---------------------------------------------- END ----------------------------------------------\n");
 		pErrorMsgs->Release();
 	}
@@ -437,7 +439,7 @@ static bool CompileShader(wchar_t *shaderFixPath, wchar_t *fileName, const char 
 		wsprintf(val, L"%ls\\%08lx%08lx-%ls_replace.bin", shaderFixPath, (UINT32)(hash >> 32), (UINT32)(hash), shaderType.c_str());
 		FILE *fw;
 		_wfopen_s(&fw, val, L"wb");
-		if (gLogFile)
+		if (LogFile)
 		{
 			char fileName[MAX_PATH];
 			wcstombs(fileName, val, MAX_PATH);
@@ -769,7 +771,7 @@ static void PrevIndexBuffer(D3D10Base::ID3D10Device *device, void *private_data)
 
 static void MarkIndexBuffer(D3D10Base::ID3D10Device *device, void *private_data)
 {
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo(">>>> Index buffer marked: index buffer hash = %08lx%08lx\n", (UINT32)(G->mSelectedIndexBuffer >> 32), (UINT32)G->mSelectedIndexBuffer);
 		for (std::set<UINT64>::iterator i = G->mSelectedIndexBuffer_PixelShader.begin(); i != G->mSelectedIndexBuffer_PixelShader.end(); ++i)
@@ -838,7 +840,7 @@ static void PrevPixelShader(D3D10Base::ID3D10Device *device, void *private_data)
 static void MarkPixelShader(D3D10Base::ID3D10Device *device, void *private_data)
 {
 	if (G->ENABLE_CRITICAL_SECTION) EnterCriticalSection(&G->mCriticalSection);
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo(">>>> Pixel shader marked: pixel shader hash = %08lx%08lx\n", (UINT32)(G->mSelectedPixelShader >> 32), (UINT32)G->mSelectedPixelShader);
 		for (std::set<UINT64>::iterator i = G->mSelectedPixelShader_IndexBuffer.begin(); i != G->mSelectedPixelShader_IndexBuffer.end(); ++i)
@@ -920,7 +922,7 @@ static void PrevVertexShader(D3D10Base::ID3D10Device *device, void *private_data
 static void MarkVertexShader(D3D10Base::ID3D10Device *device, void *private_data)
 {
 	if (G->ENABLE_CRITICAL_SECTION) EnterCriticalSection(&G->mCriticalSection);
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogInfo(">>>> Vertex shader marked: vertex shader hash = %08lx%08lx\n", (UINT32)(G->mSelectedVertexShader >> 32), (UINT32)G->mSelectedVertexShader);
 		for (std::set<UINT64>::iterator i = G->mVertexShaderInfo[G->mSelectedVertexShader].PartnerShader.begin(); i != G->mVertexShaderInfo[G->mSelectedVertexShader].PartnerShader.end(); ++i)
@@ -1014,7 +1016,7 @@ static void LogRenderTarget(void *target, char *log_prefix)
 static void MarkRenderTarget(D3D10Base::ID3D10Device *device, void *private_data)
 {
 	if (G->ENABLE_CRITICAL_SECTION) EnterCriticalSection(&G->mCriticalSection);
-	if (gLogFile)
+	if (LogFile)
 	{
 		LogRenderTarget(G->mSelectedRenderTarget, ">>>> Render target marked: ");
 		for (std::set<void *>::iterator i = G->mSelectedRenderTargetSnapshotList.begin(); i != G->mSelectedRenderTargetSnapshotList.end(); ++i)
@@ -1180,7 +1182,7 @@ void RunFrameActions(D3D10Base::ID3D10Device *device)
 
 	// Regardless of log settings, since this runs every frame, let's flush the log
 	// so that the most lost will be one frame worth.  Tradeoff of performance to accuracy
-	if (gLogFile) fflush(gLogFile);
+	if (LogFile) fflush(LogFile);
 
 	bool newEvent = DispatchInputEvents(device);
 

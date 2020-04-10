@@ -1,8 +1,10 @@
 // Shaders.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
-#include <map>
+#include "Assembler.h"
+
+#include <Windows.h>
+#include <tchar.h>
 #include <string>
 #include <vector>
 #include <iostream>

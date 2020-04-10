@@ -61,9 +61,6 @@
 #include "HackerDXGI.h"
 #include "HookedDevice.h"
 #include "HookedDXGI.h"
-
-#include "log.h"
-#include "util.h"
 #include "globals.h"
 #include "Hunting.h"
 #include "Override.h"
@@ -72,6 +69,12 @@
 #include "profiling.h"
 #include "cursor.h" // For InstallHookLate
 
+#include <log.h>
+#include <beep.h>
+#include <type_name.h>
+#include <tls.h>
+
+#include <dxgi1_5.h>
 
 // -----------------------------------------------------------------------------
 // SetWindowPos hook, activated by full_screen=2 in d3dx.ini

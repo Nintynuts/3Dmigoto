@@ -25,7 +25,7 @@ namespace D3DBase
 #include <d3dcommon.h>
 }
 
-#include "../PointerSet.h"
+#include <PointerSet.h>
 
 namespace D3DWrapper
 {

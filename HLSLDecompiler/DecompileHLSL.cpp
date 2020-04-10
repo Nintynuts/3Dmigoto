@@ -17,23 +17,21 @@
 //
 // All sscanf that did not use %s or %c were switched to sscanf_s to avoid warnings.
 
+#include "DecompileHLSL.h"
+#include "internal_includes\structs.h"
+#include "internal_includes\decode.h"
+#include "assert.h"
+
+#include <log.h>
+#include <version.h>
+
 #include <map>
 #include <string>
 #include <cstdio>
 #include <vector>
 #include <set>
 #include <algorithm>
-
-#include "DecompileHLSL.h"
-
-#include "BinaryDecompiler\internal_includes\structs.h"
-#include "BinaryDecompiler\internal_includes\decode.h"
-
 #include <excpt.h>
-
-#include "assert.h"
-#include "log.h"
-#include "version.h"
 
 // MSVC insists we use MS's secure version of scanf, which in turn insists we
 // pass the size of each string/char array as an unsigned integer. We want to

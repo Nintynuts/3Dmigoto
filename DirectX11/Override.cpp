@@ -4,10 +4,14 @@
 #include "D3D11Wrapper.h"
 #include "IniHandler.h"
 
+#include <ini_util.h>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <strsafe.h>
 #include <algorithm>
+
+using namespace std;
 
 PresetOverrideMap presetOverrides;
 

@@ -50,7 +50,7 @@
 
 #define NO_STEREO_D3D9
 
-#include "../nvapi.h"
+#include <nvapi.h>
 
 namespace nv {
     namespace stereo {

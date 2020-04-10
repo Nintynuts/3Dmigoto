@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <Shlwapi.h>
 
+#include <hash.h>
+
 // For windows shortcuts:
 #include <shobjidl.h>
 #include <shlguid.h>

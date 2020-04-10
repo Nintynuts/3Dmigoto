@@ -11,31 +11,16 @@
 #include "CommonStates.h"
 #include "Effects.h"
 #include "VertexTypes.h"
+#include "om_state.h"
 
 #include "HackerDevice.h"
 #include "HackerContext.h"
 
+#include <overlay.h>
+
 class HackerSwapChain;
 
-enum LogLevel {
-	LOG_DIRE,
-	LOG_WARNING,
-	LOG_WARNING_MONOSPACE,
-	LOG_NOTICE,
-	LOG_INFO,
-
-	NUM_LOG_LEVELS
-};
-
-class OverlayNotice {
-public:
-	std::wstring message;
-	DWORD timestamp;
-
-	OverlayNotice(std::wstring message);
-};
-
-class Overlay
+class Overlay : public OverlayBase<DirectX::SpriteFont>
 {
 private:
 	IDXGISwapChain* mOrigSwapChain;
@@ -44,7 +29,6 @@ private:
 	HackerDevice* mHackerDevice;
 	HackerContext* mHackerContext;
 
-	DirectX::XMUINT2 mResolution;
 	std::unique_ptr<DirectX::SpriteBatch> mSpriteBatch;
 	std::unique_ptr<DirectX::CommonStates> mStates;
 	std::unique_ptr<DirectX::BasicEffect> mEffect;
@@ -96,27 +80,18 @@ private:
 		ID3D11ShaderResourceView *pShaderResourceViews[1];
 	} state;
 
-	void SaveState();
-	void RestoreState();
+	virtual void SaveState() override;
+	virtual void RestoreState() override;
 	HRESULT InitDrawState();
 	void DrawShaderInfoLine(char *type, UINT64 selectedShader, float *y, bool shader);
-	void DrawShaderInfoLines(float *y);
-	void DrawNotices(float *y);
-	void DrawProfiling(float *y);
-	void DrawRectangle(float x, float y, float w, float h, float r, float g, float b, float opacity);
+	virtual void DrawShaderInfoLines(float *y) override;
+	virtual void DrawNotices(float *y) override;
+	virtual void DrawProfiling(float *y) override;
+	virtual void DrawRectangle(float x, float y, float w, float h, float r, float g, float b, float opacity) override;
 	void DrawOutlinedString(DirectX::SpriteFont *font, wchar_t const *text, DirectX::XMFLOAT2 const &position, DirectX::FXMVECTOR color);
 
 public:
-	std::unique_ptr<DirectX::SpriteFont> mFont;
-	std::unique_ptr<DirectX::SpriteFont> mFontNotifications;
-	std::unique_ptr<DirectX::SpriteFont> mFontProfiling;
-
 	Overlay(HackerDevice *pDevice, HackerContext *pContext, IDXGISwapChain *pSwapChain);
 	~Overlay();
-
 	void DrawOverlay(void);
 };
-
-void ClearNotices();
-void LogOverlayW(LogLevel level, wchar_t *fmt, ...);
-void LogOverlay(LogLevel level, char *fmt, ...);

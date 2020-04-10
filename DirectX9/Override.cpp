@@ -1,5 +1,9 @@
 #include "Override.h"
 #include "IniHandler.h"
+
+#include <enum.h>
+#include <ini_util.h>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <strsafe.h>
